@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 //        addr[i * size] = 'a';
         memset(addr, 'a', size);
 //        addr += size;
-        munmap(addr, size);
+//        munmap(addr, size);
 
 
         tscs[i] = pt1 - pt0;
