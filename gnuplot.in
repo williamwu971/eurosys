@@ -28,7 +28,7 @@ set key top left
 set yrange [0:1000000]
 #set key autotitle columnhead
 #set logscale x
-#set xrange [0:1000000]
+set xrange [-100:]
 #set nokey
 unset colorbox
 unset key
