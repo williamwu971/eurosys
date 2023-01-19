@@ -4,6 +4,8 @@ CC = g++
 
 all: ralloc.out kernel.out kv.out fs.out
 
+fs_open.out: fs.c
+	$(CC) fs_open.c -o build/fs_open.out $(LINKS)
 
 fs.out: fs.c
 	$(CC) fs.c -o build/fs.out $(LINKS)
