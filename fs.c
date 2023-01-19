@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
     char *addr = (char *) mmap(0, FILESIZE, PROT_READ | PROT_WRITE, 0x80003, fd, 0);
     assert(addr != MAP_FAILED);
 
-    madvise(addr, FILESIZE, MADV_NOHUGEPAGE);
+//    madvise(addr, FILESIZE, MADV_NOHUGEPAGE);
 
 
     if (n * size * 4 > FILESIZE) {
