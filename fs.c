@@ -1,5 +1,5 @@
 #include <x86intrin.h>
-#include "ralloc.hpp"
+//#include "ralloc.hpp"
 
 #include <stdio.h>
 #include <sys/mman.h>
@@ -9,10 +9,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <sys/select.h>
+//#include <sys/select.h>
 
-#include <iostream>
-
+//#include <iostream>
+#include <assert.h>
 
 inline
 uint64_t readTSC(int front, int back) {
@@ -34,10 +34,10 @@ int main(int argc, char **argv) {
 
     int fd = open("/pmem0/fs", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 
-    off_t offt = lseek(fd, FILESIZE - 1, SEEK_SET);
+    off_t offt = lseek(fd, (__off_t) FILESIZE - 1, SEEK_SET);
     assert(offt != -1);
 
-    int result = write(fd, "", 1);
+    ssize_t result = write(fd, "", 1);
     assert(result != -1);
 
     char *addr = (char *) mmap(0, FILESIZE, PROT_READ | PROT_WRITE, 0x80003, fd, 0);

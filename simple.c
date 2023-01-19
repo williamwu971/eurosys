@@ -1,5 +1,6 @@
 #include "ralloc.hpp"
 #include <x86intrin.h>
+#include <stdio.h>
 
 inline
 uint64_t readTSC(int front, int back) {
