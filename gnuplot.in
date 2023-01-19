@@ -1,0 +1,40 @@
+reset
+
+outname=system("echo $outname")
+filename=system("echo $dataname")
+
+set terminal pdf dashed size 7,5
+set out outname
+
+set grid ytic
+
+#set ylabel "TSC" font "Helvetica,32" offset -6, 0 rotate by 90
+set xlabel "Access Index" font "Helvetica,32" offset 0, -6 rotate by 0
+set lmargin 17
+set bmargin 12
+set rmargin 5
+set tmargin 2
+
+set style fill solid border -1
+set boxwidth 0.9
+set xtic font "Helvetica,23" rotate by 90 offset 0,-6
+set ytic font "Helvetica,32"
+set key font "Helvetica,26"
+#set key at 7.1, 790 vertical maxrows 1
+set key top left
+#set linetype 1 lc rgb 'black'
+#set style histogram gap 1
+
+set yrange [0:1000000]
+#set key autotitle columnhead
+#set logscale x
+#set xrange [0:1000000]
+#set nokey
+unset colorbox
+unset key
+
+plot  filename using ($1) with line lt rgb "black" lw 2 ti "", \
+
+
+
+
