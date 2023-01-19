@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
-rm -rf /pmem0/*
-cd build/ || exit
-rm -rf ./*.txt
+if [ "$#" -ne 1 ]; then
+  rm -rf /pmem0/*
+  cd build/ || exit
+  rm -rf ./*.txt
 
-taskset -c 12 ./ralloc.out 142800 320 || exit
-taskset -c 12 ./fs.out 142800 320 || exit
-taskset -c 12 ./kv.out 1000000 1 || exit
+  taskset -c 12 ./ralloc.out 142800 320 || exit
+  taskset -c 12 ./fs.out 142800 320 || exit
+  taskset -c 12 ./kv.out 1000000 1 || exit
 
-cd ..
+  cd ..
+else
+  echo "graph only"
+fi
+
 rm -rf ./*.pdf
 outname=ralloc.pdf dataname=build/ralloc_tscs.txt gnuplot <gnuplot.in &
 outname=fs.pdf dataname=build/fs_tscs.txt gnuplot <gnuplot.in &
