@@ -9,52 +9,51 @@ uint64_t readTSC(int front, int back) {
     return tsc;
 }
 
-int main(int argc, char** argv){
+int main(int argc, char **argv) {
 
 
-	if (argc!=3) return 1;
+    if (argc != 3) return 1;
 
-	uint64_t n = atoi(argv[1]);
-	uint64_t size = atoi(argv[2]);
-	uint64_t max = 2*1024*1024*1024ULL;
+    uint64_t n = atoi(argv[1]);
+    uint64_t size = atoi(argv[2]);
+    uint64_t max = 2 * 1024 * 1024 * 1024ULL;
 
-	if (n*size*4 > max){
-	
-		printf("too many/big\n");
-		return 1;  
-	
-	}
+    if (n * size * 4 > max) {
 
-	uint64_t * tscs = (uint64_t*)malloc(sizeof(uint64_t)*n);
-	RP_init("simple", max);
+        printf("too many/big\n");
+        return 1;
 
+    }
 
-
-	for (uint64_t i = 0;i<n;i++){
-	
-	
-		uint64_t pt0 = readTSC(1,1);
-		
-		char *a = (char*)RP_malloc(size);
-		a[0]='a';
+    uint64_t *tscs = (uint64_t *) malloc(sizeof(uint64_t) * n);
+    RP_init("simple", max);
 
 
-		uint64_t pt1 = readTSC(1,1);
-		tscs[i] = pt1 - pt0;
-	
-	}
+    for (uint64_t i = 0; i < n; i++) {
 
 
-	FILE* f = fopen("simple_tscs.txt","w");
+        uint64_t pt0 = readTSC(1, 1);
 
-	for (uint64_t i = 0;i<n;i++){
+        char *a = (char *) RP_malloc(size);
+        a[0] = 'a';
 
-		fprintf(f,"%lu\n",tscs[i]);
-	
-	
-	}
 
-	return 0;
+        uint64_t pt1 = readTSC(1, 1);
+        tscs[i] = pt1 - pt0;
+
+    }
+
+
+    FILE *f = fopen("simple_tscs.txt", "w");
+
+    for (uint64_t i = 0; i < n; i++) {
+
+        fprintf(f, "%lu\n", tscs[i]);
+
+
+    }
+
+    return 0;
 
 
 }
