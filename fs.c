@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 //        madvise(addr, size, MADV_NOHUGEPAGE);
 
 //        addr[i * size] = 'a';
-        memset(addr, 'a', size);
+//        memset(addr, 'a', size);
 //        addr += size;
 //        munmap(addr, size);
 
