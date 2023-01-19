@@ -22,4 +22,4 @@ kv.out:
 	cd RECIPE/P-Masstree/build && make clean && rm -f example && cmake .. && make -j && cd - && mv RECIPE/P-Masstree/build/example ./build/kv.out
 
 download:
-	scp 'xiaoxiang@labos2.cs.usyd.edu.au:/mnt/nvme0/xiaoxiang/eurosys/*.pdf' .
+	scp 'xiaoxiang@labos2.cs.usyd.edu.au:/mnt/nvme0/xiaoxiang/eurosys/*.pdf' ./pdfs/
