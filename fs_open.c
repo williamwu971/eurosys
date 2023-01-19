@@ -55,6 +55,8 @@ int main(int argc, char **argv) {
         char *addr = (char *) mmap(0, size, PROT_READ | PROT_WRITE, 0x80003, fd, 0);
         assert(addr != MAP_FAILED);
 
+        close(fd);
+
 //        madvise(addr, size, MADV_NOHUGEPAGE);
 
 //        addr[i * size] = 'a';
