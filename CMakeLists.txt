@@ -754,4 +754,4 @@ add_executable(eurosys
         RECIPE/Key.h
         RECIPE/ycsb.cpp
         kernel.c
-        ralloc.c fs.c fs_open.c)
+        ralloc.c fs_expand.c fs_open.c)

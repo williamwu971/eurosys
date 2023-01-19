@@ -2,13 +2,13 @@
 LINKS = -I/mnt/nvme0/xiaoxiang/eurosys/ralloc/src /mnt/nvme0/xiaoxiang/eurosys/ralloc/test/libralloc.a -pthread
 CC = g++
 
-all: ralloc.out kernel.out kv.out fs.out
+all: ralloc.out kernel.out kv.out fs_expand.out fs_open.out
 
-fs_open.out: fs.c
+fs_open.out: fs_expand.c
 	$(CC) fs_open.c -o build/fs_open.out $(LINKS)
 
-fs.out: fs.c
-	$(CC) fs.c -o build/fs.out $(LINKS)
+fs_expand.out: fs_expand.c
+	$(CC) fs_expand.c -o build/fs_expand.out $(LINKS)
 
 ralloc.out: ralloc.c
 	$(CC) ralloc.c -o build/ralloc.out $(LINKS)

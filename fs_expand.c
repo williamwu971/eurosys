@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     uint64_t n = atoi(argv[1]);
     uint64_t size = atoi(argv[2]);
 
-    int fd = open("/pmem0/fs", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int fd = open("/pmem0/fs_expand", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 
 //    madvise(addr, FILESIZE, MADV_NOHUGEPAGE);
 
@@ -45,12 +45,12 @@ int main(int argc, char **argv) {
 
         uint64_t pt0 = readTSC(1, 1);
 
-        posix_fallocate(fd, i * size, size);
-//        off_t offt = lseek(fd, (__off_t) size - 1, SEEK_CUR);
-//        assert(offt != -1);
-//
-//        ssize_t result = write(fd, "", 1);
-//        assert(result != -1);
+//        posix_fallocate(fd, i * size, size);
+        off_t offt = lseek(fd, (__off_t) size - 1, SEEK_CUR);
+        assert(offt != -1);
+
+        ssize_t result = write(fd, "", 1);
+        assert(result != -1);
 
         uint64_t pt1 = readTSC(1, 1);
 
@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
 //        madvise(addr, size, MADV_NOHUGEPAGE);
 
 //        addr[i * size] = 'a';
-//        memset(addr, 'a', size);
+        memset(addr, 'a', size);
 //        addr += size;
 //        munmap(addr, size);
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     }
 
 
-    FILE *f = fopen("fs_tscs.txt", "w");
+    FILE *f = fopen("fs_expand_tscs.txt", "w");
 
     for (uint64_t i = 0; i < n; i++) {
 
