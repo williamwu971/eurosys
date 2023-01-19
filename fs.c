@@ -9,6 +9,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 //#include <sys/select.h>
 
 //#include <iostream>
@@ -51,7 +53,11 @@ int main(int argc, char **argv) {
         assert(result != -1);
 
         addr = (char *) mmap(addr, size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (i * size));
-        assert(addr != MAP_FAILED);
+        if (addr == MAP_FAILED) {
+            printf("error: %s\n", strerror(errno));
+            assert(addr != MAP_FAILED);
+        }
+
         madvise(addr, size, MADV_NOHUGEPAGE);
 
         addr[0] = 'a';
