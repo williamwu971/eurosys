@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
         ssize_t result = write(fd, "", 1);
         assert(result != -1);
 
-        addr = (char *) mmap(addr, size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (i * size));
+        addr = (char *) mmap(NULL, size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (i * size));
         assert(addr != MAP_FAILED);
         madvise(addr, size, MADV_NOHUGEPAGE);
 
