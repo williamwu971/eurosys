@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     }
 
     uint64_t *tscs = (uint64_t *) malloc(sizeof(uint64_t) * n);
-    RP_init("simple", max);
+    RP_init("ralloc", max);
 
 
     for (uint64_t i = 0; i < n; i++) {
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     }
 
 
-    FILE *f = fopen("simple_tscs.txt", "w");
+    FILE *f = fopen("ralloc_tscs.txt", "w");
 
     for (uint64_t i = 0; i < n; i++) {
 
