@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
         uint64_t pt0 = readTSC(1, 1);
 
-        posix_fallocate(fd,i*size,size);
+        posix_fallocate(fd, i * size, size);
 //        off_t offt = lseek(fd, (__off_t) size - 1, SEEK_CUR);
 //        assert(offt != -1);
 //
@@ -54,18 +54,18 @@ int main(int argc, char **argv) {
 
         uint64_t pt1 = readTSC(1, 1);
 
-        char *addr = (char *) mmap(NULL, (i + 1) * size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (0));
+        char *addr = (char *) mmap(NULL, size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (i * size));
         if (addr == MAP_FAILED) {
             printf("error: %s\n", strerror(errno));
             assert(addr != MAP_FAILED);
         }
 
-        madvise(addr, (i + 1) * size, MADV_NOHUGEPAGE);
+        madvise(addr, size, MADV_NOHUGEPAGE);
 
 //        addr[i * size] = 'a';
-        memset(addr + i * size, 'a', size);
+        memset(addr, 'a', size);
 //        addr += size;
-        munmap(addr, (i + 1) * size);
+//        munmap(addr, (i + 1) * size);
 
 
 
