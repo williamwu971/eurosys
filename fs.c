@@ -60,10 +60,10 @@ int main(int argc, char **argv) {
             assert(addr != MAP_FAILED);
         }
 
-        madvise(addr, size, MADV_NOHUGEPAGE);
+//        madvise(addr, size, MADV_NOHUGEPAGE);
 
 //        addr[i * size] = 'a';
-        memset(addr, 'a', size);
+//        memset(addr, 'a', size);
 //        addr += size;
 //        munmap(addr, size);
 
