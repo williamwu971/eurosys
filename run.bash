@@ -18,6 +18,7 @@ rm -rf ./*.pdf
 outname=ralloc.pdf dataname=build/ralloc_tscs.txt gnuplot <gnuplot.in &
 outname=kernel.pdf dataname=build/kernel_tscs.txt gnuplot <gnuplot.in &
 outname=kv.pdf dataname=build/kv_tscs.txt gnuplot <gnuplot.in &
+outname=fs.pdf dataname=build/fs_tscs.txt gnuplot <gnuplot.in &
 
 while pgrep -i -f gnuplot >/dev/null; do
   sleep 1
