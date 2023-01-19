@@ -45,12 +45,12 @@ int main(int argc, char **argv) {
 
         uint64_t pt0 = readTSC(1, 1);
 
-//        posix_fallocate(fd, i * size, size);
-        off_t offt = lseek(fd, (__off_t) size - 1, SEEK_CUR);
-        assert(offt != -1);
-
-        ssize_t result = write(fd, "", 1);
-        assert(result != -1);
+        posix_fallocate(fd, i * size, size);
+//        off_t offt = lseek(fd, (__off_t) size - 1, SEEK_CUR);
+//        assert(offt != -1);
+//
+//        ssize_t result = write(fd, "", 1);
+//        assert(result != -1);
 
         uint64_t pt1 = readTSC(1, 1);
 
