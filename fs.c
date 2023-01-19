@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
             assert(addr != MAP_FAILED);
         }
 
-//        madvise(addr, size, MADV_NOHUGEPAGE);
+        madvise(addr, (i + 1) * size, MADV_NOHUGEPAGE);
 
         addr[i * size] = 'a';
 //        addr += size;
