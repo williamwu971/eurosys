@@ -21,7 +21,7 @@ rm -rf ./*.pdf
 #outname=kernel.pdf dataname=build/kernel_tscs.txt gnuplot <gnuplot.in &
 #outname=kv.pdf dataname=build/kv_tscs.txt gnuplot <gnuplot.in &
 outname=fs_expand.pdf dataname=build/fs_expand_tscs.txt gnuplot <gnuplot.in &
-outname=fs_open.pdf dataname=build/fs_open_tscs.txt gnuplot <gnuplot.in &
+#outname=fs_open.pdf dataname=build/fs_open_tscs.txt gnuplot <gnuplot.in &
 
 while pgrep -i -f gnuplot >/dev/null; do
   sleep 1
