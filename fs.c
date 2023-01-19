@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 //    madvise(addr, FILESIZE, MADV_NOHUGEPAGE);
 
     uint64_t *tscs = (uint64_t *) malloc(sizeof(uint64_t) * n);
-    char *addr = NULL;
+//    char *addr = NULL;
 
 
     for (uint64_t i = 0; i < n; i++) {
@@ -52,16 +52,16 @@ int main(int argc, char **argv) {
         ssize_t result = write(fd, "", 1);
         assert(result != -1);
 
-        addr = (char *) mmap(addr, size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (i * size));
+        char *addr = (char *) mmap(NULL, i * size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (0));
         if (addr == MAP_FAILED) {
             printf("error: %s\n", strerror(errno));
             assert(addr != MAP_FAILED);
         }
 
-        madvise(addr, size, MADV_NOHUGEPAGE);
+//        madvise(addr, size, MADV_NOHUGEPAGE);
 
-        addr[0] = 'a';
-        addr += size;
+        addr[i * size] = 'a';
+//        addr += size;
 
 
         uint64_t pt1 = readTSC(1, 1);
