@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         ssize_t result = write(fd, "", 1);
         assert(result != -1);
 
-        char *addr = (char *) mmap(NULL, i * size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (0));
+        char *addr = (char *) mmap(NULL, (i + 1) * size, PROT_READ | PROT_WRITE, 0x80003, fd, (__off_t) (0));
         if (addr == MAP_FAILED) {
             printf("error: %s\n", strerror(errno));
             assert(addr != MAP_FAILED);
@@ -62,6 +62,7 @@ int main(int argc, char **argv) {
 
         addr[i * size] = 'a';
 //        addr += size;
+        munmap(addr, (i + 1) * size);
 
 
         uint64_t pt1 = readTSC(1, 1);
