@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     uint64_t FILESIZE = 2 * 1024 * 1024 * 1024ULL;
 
 
-    int fd = open("/pmem0/fs", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int fd = open("/pmem0/kernel", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 
     off_t offt = lseek(fd, (__off_t) FILESIZE - 1, SEEK_SET);
     assert(offt != -1);
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     }
 
 
-    FILE *f = fopen("fs_tscs.txt", "w");
+    FILE *f = fopen("kernel_tscs.txt", "w");
 
     for (uint64_t i = 0; i < n; i++) {
 

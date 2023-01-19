@@ -2,15 +2,15 @@
 LINKS = -I/mnt/nvme0/xiaoxiang/eurosys/ralloc/src /mnt/nvme0/xiaoxiang/eurosys/ralloc/test/libralloc.a -pthread
 CC = g++
 
-all: ralloc.out fs.out kv.out
+all: ralloc.out kernel.out kv.out
 
 
 ralloc.out: ralloc.c
 	$(CC) ralloc.c -o build/ralloc.out $(LINKS)
 
 
-fs.out: fs.c
-	$(CC) fs.c -o build/fs.out $(LINKS)
+kernel.out: kernel.c
+	$(CC) kernel.c -o build/kernel.out $(LINKS)
 
 clean:
 	rm -rf /pmem0/* ./build/*

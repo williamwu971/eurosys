@@ -753,5 +753,5 @@ add_executable(eurosys
         RECIPE/third-party/WOART/woart.h
         RECIPE/Key.h
         RECIPE/ycsb.cpp
-        fs.c
+        kernel.c
         ralloc.c)
