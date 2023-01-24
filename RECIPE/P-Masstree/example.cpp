@@ -36,6 +36,8 @@ void run(char **argv) {
     tbb::task_scheduler_init init(num_thread);
 
     printf("operation,n,ops/s\n");
+    system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
+
     masstree::masstree *tree = new masstree::masstree();
 
     {
@@ -58,6 +60,9 @@ void run(char **argv) {
         printf("Throughput: insert,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: insert,%ld,%f sec\n", n, duration.count() / 1000000.0);
     }
+
+
+    system("sudo pkill --signal SIGHUP -f pcm-memory");
 
     {
         // Lookup
