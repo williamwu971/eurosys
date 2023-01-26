@@ -120,14 +120,14 @@ void run(char **argv) {
     delete[] keys;
 
 
-    FILE *f = fopen("kv_tscs.txt", "w");
-
-    for (uint64_t i = 0; i < n; i++) {
-
-        fprintf(f, "%lu\n", tscs[i]);
-
-
-    }
+//    FILE *f = fopen("kv_tscs.txt", "w");
+//
+//    for (uint64_t i = 0; i < n; i++) {
+//
+//        fprintf(f, "%lu\n", tscs[i]);
+//
+//
+//    }
 
     delete[] tscs;
 
