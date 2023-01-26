@@ -7,7 +7,8 @@ if [ "$#" -ne 1 ]; then
 
   # taskset -c 12 ./ralloc.out 142800 320 || exit
   # taskset -c 12 ./kernel.out 142800 320 || exit
-  taskset -c 12 ./kv.out 1000000 1 || exit
+  taskset -c 0-20 ./kv.out 100000000 19 || exit
+  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
   #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
   #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit
 
