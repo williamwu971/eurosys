@@ -52,7 +52,7 @@ void run(char **argv) {
     uint64_t *keys = new uint64_t[n];
     uint64_t *tscs = new uint64_t[n];
 
-    RP_init("kv", 2 * 1024 * 1024 * 1024ULL);
+//    RP_init("kv", 2 * 1024 * 1024 * 1024ULL);
 
     // Generate keys
     for (uint64_t i = 0; i < n; i++) {
