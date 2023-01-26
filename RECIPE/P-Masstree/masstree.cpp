@@ -27,7 +27,7 @@ int my_malloc(void **memptr, size_t alignment, size_t size){
 
 }
 
-#define posix_memalign my_malloc
+//#define posix_memalign my_malloc
 
 using namespace MASS;
 

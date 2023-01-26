@@ -78,6 +78,7 @@ void run(char **argv) {
                 for (uint64_t idx = 0; idx < 1024 / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
                 }
+                clflush(reinterpret_cast<char *>(value), 1024, false, true);
 
                 uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
