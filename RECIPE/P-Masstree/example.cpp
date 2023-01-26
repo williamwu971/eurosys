@@ -14,6 +14,33 @@ uint64_t readTSC(int front, int back) {
     return tsc;
 }
 
+static constexpr uint64_t CACHE_LINE_SIZE = 64;
+
+static inline void fence() {
+    asm volatile("" : : : "memory");
+}
+
+static inline void mfence() {
+    asm volatile("sfence":: :"memory");
+}
+
+static inline void clflush(char *data, int len, bool front, bool back) {
+    volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
+    if (front)
+        mfence();
+    for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
+#ifdef CLFLUSH
+        asm volatile("clflush %0" : "+m" (*(volatile char *)ptr));
+#elif CLFLUSH_OPT
+        asm volatile(".byte 0x66; clflush %0" : "+m" (*(volatile char *)(ptr)));
+#elif CLWB
+        asm volatile(".byte 0x66; xsaveopt %0" : "+m" (*(volatile char *)(ptr)));
+#endif
+    }
+    if (back)
+        mfence();
+}
+
 using namespace std;
 
 #include "masstree.h"
@@ -25,7 +52,7 @@ void run(char **argv) {
     uint64_t *keys = new uint64_t[n];
     uint64_t *tscs = new uint64_t[n];
 
-    RP_init("kv",2*1024*1024*1024ULL);
+    RP_init("kv", 2 * 1024 * 1024 * 1024ULL);
 
     // Generate keys
     for (uint64_t i = 0; i < n; i++) {
@@ -47,12 +74,18 @@ void run(char **argv) {
             auto t = tree->getThreadInfo();
             for (uint64_t i = range.begin(); i != range.end(); i++) {
 
-		uint64_t pt0 = readTSC(1,1);
-                tree->put(keys[i], &keys[i], t);
-		uint64_t pt1 = readTSC(1,1);
+                auto value = (uint64_t *) malloc(1024);
+                for (uint64_t idx = 0; idx < 1024 / sizeof(uint64_t); idx++) {
+                    value[idx] = keys[i];
+                }
+
+                uint64_t pt0 = readTSC(1, 1);
+//                tree->put(keys[i], &keys[i], t);
+                tree->put(keys[i], value, t);
+                uint64_t pt1 = readTSC(1, 1);
 
 
-		tscs[i] = pt1-pt0;
+                tscs[i] = pt1 - pt0;
             }
         });
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -86,15 +119,14 @@ void run(char **argv) {
     delete[] keys;
 
 
-    
-        FILE* f = fopen("kv_tscs.txt","w");
+    FILE *f = fopen("kv_tscs.txt", "w");
 
-        for (uint64_t i = 0;i<n;i++){
+    for (uint64_t i = 0; i < n; i++) {
 
-                fprintf(f,"%lu\n",tscs[i]);
+        fprintf(f, "%lu\n", tscs[i]);
 
 
-        }
+    }
 
     delete[] tscs;
 
@@ -102,7 +134,8 @@ void run(char **argv) {
 
 int main(int argc, char **argv) {
     if (argc != 3) {
-        printf("usage: %s [n] [nthreads]\nn: number of keys (integer)\nnthreads: number of threads (integer)\n", argv[0]);
+        printf("usage: %s [n] [nthreads]\nn: number of keys (integer)\nnthreads: number of threads (integer)\n",
+               argv[0]);
         return 1;
     }
 
