@@ -14,6 +14,9 @@
 //#include <iostream>
 #include <assert.h>
 
+#define MAP_HUGE_2MB    (21 << MAP_HUGE_SHIFT)
+#define MAP_HUGE_1GB    (30 << MAP_HUGE_SHIFT)
+
 inline
 uint64_t readTSC(int front, int back) {
     if (front)_mm_lfence();  // optionally wait for earlier insns to retire before reading the clock
@@ -41,6 +44,7 @@ int main(int argc, char **argv) {
     assert(result != -1);
 
     char *addr = (char *) mmap(0, FILESIZE, PROT_READ | PROT_WRITE, 0x80003, fd, 0);
+    //char *addr = (char *) mmap(0, FILESIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     assert(addr != MAP_FAILED);
 
 //    madvise(addr, FILESIZE, MADV_NOHUGEPAGE);
@@ -79,6 +83,9 @@ int main(int argc, char **argv) {
 
 
     }
+
+    char buf[128];
+    fgets(buf,128,stdin);
 
     return 0;
 
