@@ -3,14 +3,19 @@
 if [ "$#" -ne 1 ]; then
 
   cd build/ || exit
-  rm -rf ./*.txt /pmem0/* /mnt/nvme0/*
 
-  # taskset -c 12 ./ralloc.out 142800 320 || exit
-  # taskset -c 12 ./kernel.out 142800 320 || exit
-  taskset -c 0-20 ./kv.out 100000000 19 || exit
-  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
-  #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
-  #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit
+  total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
+  for t in "${total_sizes[@]}"; do
+
+    rm -rf ./*.txt /pmem0/* /mnt/nvme0/*
+
+    # taskset -c 12 ./ralloc.out 142800 320 || exit
+    # taskset -c 12 ./kernel.out 142800 320 || exit
+    masstree_flush=0 masstree_size="$t" masstree_pmem=1 taskset -c 0-20 ./kv.out 100000000 20 || exit
+    #  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
+    #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
+    #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit
+  done
 
   cd ..
 else
