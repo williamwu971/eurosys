@@ -69,7 +69,7 @@ void run(char **argv) {
 
     int pmem = strcmp(getenv("masstree_pmem"), "1") == 0;
     if (pmem) {
-        RP_init("kv", 16 * 1024 * 1024 * 1024ULL);
+        RP_init("kv", 160 * 1024 * 1024 * 1024ULL);
     }
 
 
