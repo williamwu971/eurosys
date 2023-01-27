@@ -52,8 +52,6 @@ void run(char **argv) {
     uint64_t *keys = new uint64_t[n];
     uint64_t *tscs = new uint64_t[n];
 
-//    RP_init("kv", 2 * 1024 * 1024 * 1024ULL);
-
     // Generate keys
     for (uint64_t i = 0; i < n; i++) {
         keys[i] = i + 1;
@@ -63,7 +61,19 @@ void run(char **argv) {
     tbb::task_scheduler_init init(num_thread);
 
     printf("operation,n,ops/s\n");
-    system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
+    int flush = strcmp(getenv("masstree_flush"), "1") == 0;
+
+    int size = atoi(getenv("masstree_size"));
+    if (size < 8) size = 8;
+    size = size / 8 * 8;
+
+    int pmem = strcmp(getenv("masstree_pmem"), "1") == 0;
+    if (pmem) {
+        RP_init("kv", 16 * 1024 * 1024 * 1024ULL);
+    }
+
+
+//    system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -74,11 +84,20 @@ void run(char **argv) {
             auto t = tree->getThreadInfo();
             for (uint64_t i = range.begin(); i != range.end(); i++) {
 
-                auto value = (uint64_t *) malloc(1024);
-                for (uint64_t idx = 0; idx < 1024 / sizeof(uint64_t); idx++) {
+                uint64_t *value = nullptr;
+
+                if (pmem) {
+                    value = static_cast<uint64_t *>(RP_malloc(size));
+                } else {
+                    value = static_cast<uint64_t *> (malloc(size));
+                }
+
+                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
                 }
-                clflush(reinterpret_cast<char *>(value), 1024, false, true);
+                if (flush) {
+                    clflush(reinterpret_cast<char *>(value), size, false, true);
+                }
 
                 uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
@@ -93,10 +112,14 @@ void run(char **argv) {
                 std::chrono::system_clock::now() - starttime);
         printf("Throughput: insert,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: insert,%ld,%f sec\n", n, duration.count() / 1000000.0);
+
+        FILE *f = fopen("perf.csv", "a");
+        fprintf(f, "%d,%d,%d,%lu,%f,%f\n", flush, size, pmem,
+                n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
     }
 
 
-    system("sudo pkill --signal SIGHUP -f pcm-memory");
+//    system("sudo pkill --signal SIGHUP -f pcm-memory");
 
     {
         // Lookup
