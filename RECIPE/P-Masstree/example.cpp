@@ -5,6 +5,7 @@
 #include "ralloc.hpp"
 
 #include <x86intrin.h>
+#include <csignal>
 
 inline
 uint64_t readTSC(int front, int back) {
@@ -45,6 +46,38 @@ using namespace std;
 
 #include "masstree.h"
 
+int bench_start() {
+
+    int res = 1;
+
+    char command[4096];
+    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf stat "
+                     "-e cycle_activity.stalls_l1d_miss "
+                     "-e cycle_activity.stalls_l2_miss "
+                     "-e cycle_activity.stalls_l3_miss "
+                     "-e cycle_activity.stalls_mem_any "
+                     "-e cycle_activity.stalls_total "
+                     "-e resource_stalls.sb "
+                     "-p %d -o bench.stat --append -g >> perf_stat.out 2>&1 &",
+            getpid());
+    res &= system(command);
+    res &= system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
+    sleep(1);
+
+    return res;
+}
+
+int bench_end() {
+
+    int res = 1;
+    res &= system("sudo killall -s INT perf");
+    res &= system("sudo pkill --signal SIGHUP -f pcm-memory");
+
+    sleep(1);
+
+    return res;
+}
+
 void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
@@ -71,9 +104,6 @@ void run(char **argv) {
     if (pmem) {
         RP_init("kv", 160 * 1024 * 1024 * 1024ULL);
     }
-
-
-//    system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -165,7 +195,6 @@ void run(char **argv) {
                 n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
     }
 
-//    system("sudo pkill --signal SIGHUP -f pcm-memory");
 
     {
         // Lookup
