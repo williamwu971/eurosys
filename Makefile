@@ -29,4 +29,4 @@ kv.out:
 
 download:
 	#scp 'xiaoxiang@labos2.cs.usyd.edu.au:/mnt/sdb/xiaoxiang/eurosys/*.pdf' ./pdfs/
-	scp 'xiaoxiang@labos2.cs.usyd.edu.au:/mnt/sdb/xiaoxiang/eurosys/build/*csv' .
+	scp 'xiaoxiang@labos2.cs.usyd.edu.au:/mnt/sdb/xiaoxiang/eurosys/build/*{csv,stat}' .

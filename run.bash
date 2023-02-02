@@ -10,6 +10,7 @@ if [ "$#" -ne 1 ]; then
   flushes=("0" "1")
   total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
   total_sizes=("512" "1024" "2048" "4096")
+  total_sizes=($(seq 512 512 3072))
 
   for f in "${flushes[@]}"; do
     for t in "${total_sizes[@]}"; do
@@ -19,7 +20,7 @@ if [ "$#" -ne 1 ]; then
       # taskset -c 12 ./ralloc.out 142800 320 || exit
       # taskset -c 12 ./kernel.out 142800 320 || exit
 #      LD_PRELOAD=/home/blepers/gperftools/.libs/libtcmalloc.so masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 100000000 20 || exit
-      masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 50000000 20 || exit
+      masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 80000000 20 || exit
       #  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit
