@@ -3,6 +3,7 @@
 if [ "$#" -ne 1 ]; then
 
   cd build/ || exit
+  find . -type f -print0 | xargs --null grep -Z -L '.out' | xargs --null rm
 
   echo "" >>perf.csv
   echo "section,flush,size,pmem,n,Throughput,Elapsed" >>perf.csv
@@ -19,7 +20,7 @@ if [ "$#" -ne 1 ]; then
 
       # taskset -c 12 ./ralloc.out 142800 320 || exit
       # taskset -c 12 ./kernel.out 142800 320 || exit
-#      LD_PRELOAD=/home/blepers/gperftools/.libs/libtcmalloc.so masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 100000000 20 || exit
+      #      LD_PRELOAD=/home/blepers/gperftools/.libs/libtcmalloc.so masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 100000000 20 || exit
       masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 80000000 20 || exit
       #  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
