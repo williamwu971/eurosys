@@ -113,11 +113,57 @@ void run(char **argv) {
         printf("Throughput: insert,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: insert,%ld,%f sec\n", n, duration.count() / 1000000.0);
 
+//        FILE *f = fopen("perf.csv", "a");
+//        fprintf(f, "%d,%d,%d,%lu,%f,%f\n", flush, size, pmem,
+//                n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
+    }
+
+    {
+        // update
+        auto starttime = std::chrono::system_clock::now();
+        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
+            auto t = tree->getThreadInfo();
+            for (uint64_t i = range.begin(); i != range.end(); i++) {
+
+                uint64_t *value = nullptr;
+
+                if (pmem) {
+                    value = static_cast<uint64_t *>(RP_malloc(size));
+                } else {
+                    value = static_cast<uint64_t *> (malloc(size));
+                }
+
+                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
+                    value[idx] = keys[i];
+                }
+                if (flush) {
+                    clflush(reinterpret_cast<char *>(value), size, false, true);
+                }
+
+                uint64_t pt0 = readTSC(1, 1);
+//                tree->put(keys[i], &keys[i], t);
+                void *val = tree->put_and_return(keys[i], value, t);
+                uint64_t pt1 = readTSC(1, 1);
+
+
+                tscs[i] = pt1 - pt0;
+
+                if (pmem) {
+                    RP_free(val);
+                } else {
+                    free(val);
+                }
+            }
+        });
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                std::chrono::system_clock::now() - starttime);
+        printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
+        printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
+
         FILE *f = fopen("perf.csv", "a");
         fprintf(f, "%d,%d,%d,%lu,%f,%f\n", flush, size, pmem,
                 n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
     }
-
 
 //    system("sudo pkill --signal SIGHUP -f pcm-memory");
 
