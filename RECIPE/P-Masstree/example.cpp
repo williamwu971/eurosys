@@ -149,6 +149,7 @@ void run(char **argv) {
     }
 
     {
+        bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
         tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
@@ -187,6 +188,9 @@ void run(char **argv) {
         });
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
+
+        bench_end();
+
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
 
