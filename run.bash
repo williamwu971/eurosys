@@ -4,6 +4,9 @@ if [ "$#" -ne 1 ]; then
 
   cd build/ || exit
 
+  echo "" >>perf.csv
+  echo "section,flush,size,pmem,Throughput,Elapsed" >>perf.csv
+
   total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
   for t in "${total_sizes[@]}"; do
 

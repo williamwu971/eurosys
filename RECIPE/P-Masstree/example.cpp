@@ -161,7 +161,7 @@ void run(char **argv) {
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
 
         FILE *f = fopen("perf.csv", "a");
-        fprintf(f, "%d,%d,%d,%lu,%f,%f\n", flush, size, pmem,
+        fprintf(f, "update,%d,%d,%d,%lu,%f,%f\n", flush, size, pmem,
                 n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
     }
 
