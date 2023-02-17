@@ -7,6 +7,7 @@
 
 #include <x86intrin.h>
 #include <csignal>
+#include <libpmem.h>
 
 inline
 uint64_t readTSC(int front, int back) {
@@ -164,6 +165,10 @@ void run(char **argv) {
 #pragma omp parallel
         {
             auto t = tree->getThreadInfo();
+            auto buffer = static_cast<uint64_t *> (malloc(size));
+            memset(buffer, 12, size);
+
+
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
                 uint64_t *value = nullptr;
@@ -174,12 +179,16 @@ void run(char **argv) {
                     value = static_cast<uint64_t *> (malloc(size));
                 }
 
-                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
-                    value[idx] = keys[i];
-                }
-                if (flush) {
-                    clflush(reinterpret_cast<char *>(value), size, false, true);
-                }
+//                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
+//                    value[idx] = keys[i];
+//                }
+//                if (flush) {
+//                    clflush(reinterpret_cast<char *>(value), size, false, true);
+//                }
+
+                buffer[0] = keys[i];
+                pmem_memcpy_persist(value, buffer, size);
+
 
                 uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
