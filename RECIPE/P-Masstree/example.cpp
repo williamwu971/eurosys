@@ -1,8 +1,9 @@
 #include <iostream>
 #include <chrono>
 #include <random>
-#include "tbb/tbb.h"
+//#include "tbb/tbb.h"
 #include "ralloc.hpp"
+#include <omp.h>
 
 #include <x86intrin.h>
 #include <csignal>
@@ -91,7 +92,8 @@ void run(char **argv) {
     }
 
     int num_thread = atoi(argv[2]);
-    tbb::task_scheduler_init init(num_thread);
+    omp_set_num_threads(num_thread);
+//    tbb::task_scheduler_init init(num_thread);
 
     printf("operation,n,ops/s\n");
     int flush = strcmp(getenv("masstree_flush"), "1") == 0;
@@ -110,9 +112,14 @@ void run(char **argv) {
     {
         // Build tree
         auto starttime = std::chrono::system_clock::now();
-        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
+//        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
+
+#pragma omp parallel
+        {
+
+
             auto t = tree->getThreadInfo();
-            for (uint64_t i = range.begin(); i != range.end(); i++) {
+            for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
                 uint64_t *value = nullptr;
 
@@ -137,7 +144,9 @@ void run(char **argv) {
 
                 tscs[i] = pt1 - pt0;
             }
-        });
+        }
+
+//        });
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
         printf("Throughput: insert,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
@@ -152,9 +161,10 @@ void run(char **argv) {
         bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
-        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
+#pragma omp parallel
+        {
             auto t = tree->getThreadInfo();
-            for (uint64_t i = range.begin(); i != range.end(); i++) {
+            for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
                 uint64_t *value = nullptr;
 
@@ -185,7 +195,7 @@ void run(char **argv) {
                     free(val);
                 }
             }
-        });
+        }
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
 
@@ -203,16 +213,17 @@ void run(char **argv) {
     {
         // Lookup
         auto starttime = std::chrono::system_clock::now();
-        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
+#pragma omp parallel
+        {
             auto t = tree->getThreadInfo();
-            for (uint64_t i = range.begin(); i != range.end(); i++) {
+            for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
                 uint64_t *ret = reinterpret_cast<uint64_t *> (tree->get(keys[i], t));
                 if (*ret != keys[i]) {
                     std::cout << "wrong value read: " << *ret << " expected:" << keys[i] << std::endl;
                     throw;
                 }
             }
-        });
+        }
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
         printf("Throughput: lookup,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
