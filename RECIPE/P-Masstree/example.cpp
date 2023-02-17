@@ -185,13 +185,13 @@ void run(char **argv) {
 
 
                 buffer[0] = keys[i];
-//                pmem_memcpy_persist(value, buffer, size);
-                memcpy(value, buffer, size);
+                pmem_memcpy_persist(value, buffer, size);
+//                memcpy(value, buffer, size);
 //                pmem_persist(value, size);
 
-                if (flush) {
-                    clflush(reinterpret_cast<char *>(value), size, false, true);
-                }
+//                if (flush) {
+//                    clflush(reinterpret_cast<char *>(value), size, false, true);
+//                }
 
 
                 uint64_t pt0 = readTSC(1, 1);
