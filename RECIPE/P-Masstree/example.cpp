@@ -99,8 +99,8 @@ static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_
     for (size_t idx = 0; idx < n; idx += 64) {
         memcpy(dest + idx, src + idx, 64);
         if (!no_flush) {
-            clflush(reinterpret_cast<char *>(dest + idx), 64, false, true);
-            //                pmem_persist(value, size);
+//            clflush(reinterpret_cast<char *>(dest + idx), 64, false, true);
+            pmem_persist(dest + idx, 64);
         }
     }
     return NULL;
