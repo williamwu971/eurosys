@@ -123,7 +123,7 @@ void run(char **argv) {
         RP_init("kv", 160 * 1024 * 1024 * 1024ULL);
     }
 
-    printf("n:<%lu> num_thread:<%d> no_flush:<%d> pmem:<%d>\n", n, num_thread, no_flush, pmem);
+    printf("n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d>\n", n, num_thread, no_flush, size, pmem);
 
     masstree::masstree *tree = new masstree::masstree();
 
