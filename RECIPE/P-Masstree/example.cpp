@@ -96,6 +96,15 @@ double dram_read_bw;
 double dram_write_bw;
 
 static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_flush) {
+
+    memcpy(dest, src, n);
+    if (!no_flush) {
+//            clflush(reinterpret_cast<char *>(dest + idx), 64, false, true);
+        pmem_persist(dest, n);
+    }
+
+    return NULL;
+
     for (size_t idx = 0; idx < n; idx += 64) {
         memcpy(dest + idx, src + idx, 64);
         if (!no_flush) {
