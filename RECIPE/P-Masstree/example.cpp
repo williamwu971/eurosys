@@ -80,6 +80,21 @@ int bench_end() {
     return res;
 }
 
+void parse_bandwidth(double elapsed);
+
+uint64_t pmem_read;
+uint64_t pmem_write;
+uint64_t dram_read;
+uint64_t dram_write;
+double pmem_read_gb;
+double pmem_write_gb;
+double pmem_read_bw;
+double pmem_write_bw;
+double dram_read_gb;
+double dram_write_gb;
+double dram_read_bw;
+double dram_write_bw;
+
 void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
@@ -216,13 +231,20 @@ void run(char **argv) {
                 std::chrono::system_clock::now() - starttime);
 
         bench_end();
+        parse_bandwidth(duration.count() / 1000000.0);
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
 
         FILE *f = fopen("perf.csv", "a");
-        fprintf(f, "update,%d,%d,%d,%lu,%f,%f\n", no_flush, size, pmem,
+        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
                 n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
+
+        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", pmem_read_gb, pmem_read_bw, pmem_write_gb, pmem_write_bw);
+        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", dram_read_gb, dram_read_bw, dram_write_gb, dram_write_bw);
+        fprintf(f, "\n");
+        fclose(f);
+
     }
 
 
@@ -271,4 +293,74 @@ int main(int argc, char **argv) {
 
     run(argv);
     return 0;
+}
+
+void parse_bandwidth(double elapsed) {
+
+
+    int scanned_channel;
+
+    while (true) {
+
+        scanned_channel = 0;
+
+        FILE *file = fopen("/mnt/sdb/xiaoxiang/pcm.txt", "r");
+        pmem_read = 0;
+        pmem_write = 0;
+        dram_read = 0;
+        dram_write = 0;
+
+        char buffer[256];
+        int is_first_line = 1;
+        while (fgets(buffer, 256, file) != nullptr) {
+
+            if (is_first_line) {
+                is_first_line = 0;
+                continue;
+            }
+
+            uint64_t skt, channel, pmmReads, pmmWrites, elapsedTime, dramReads, dramWrites;
+            sscanf(buffer, "%lu %lu %lu %lu %lu %lu %lu",
+                   &skt, &channel, &pmmReads, &pmmWrites, &elapsedTime, &dramReads, &dramWrites
+            );
+
+            scanned_channel++;
+            pmem_read += pmmReads;
+            pmem_write += pmmWrites;
+            dram_read += dramReads;
+            dram_write += dramWrites;
+        }
+
+        if (scanned_channel >= 16) {
+            break;
+        } else {
+            puts("pcm.txt parse failed");
+        }
+    }
+
+    pmem_read_gb = (double) pmem_read / 1024.0f / 1024.0f / 1024.0f;
+    pmem_write_gb = (double) pmem_write / 1024.0f / 1024.0f / 1024.0f;
+
+    pmem_read_bw = pmem_read_gb / elapsed;
+    pmem_write_bw = pmem_write_gb / elapsed;
+
+    dram_read_gb = (double) dram_read / 1024.0f / 1024.0f / 1024.0f;
+    dram_write_gb = (double) dram_write / 1024.0f / 1024.0f / 1024.0f;
+
+    dram_read_bw = dram_read_gb / elapsed;
+    dram_write_bw = dram_write_gb / elapsed;
+
+
+    printf("PR: %7.2fgb %7.2fgb/s ", pmem_read_gb, pmem_read_bw);
+    printf("PW: %7.2fgb %7.2fgb/s ", pmem_write_gb, pmem_write_bw);
+
+    printf("\n");
+
+//    printf("elapsed: %.2f ", elapsed);
+
+    printf("DR: %7.2fgb %7.2fgb/s ", dram_read_gb, dram_read_bw);
+    printf("DW: %7.2fgb %7.2fgb/s ", dram_write_gb, dram_write_bw);
+
+    printf("\n");
+
 }

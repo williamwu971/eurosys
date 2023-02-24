@@ -6,7 +6,7 @@ if [ "$#" -ne 1 ]; then
   find . -type f -print0 | xargs --null grep -Z -L '.out' | xargs --null rm
 
   echo "" >>perf.csv
-  echo "section,no_flush,size,pmem,n,Throughput,Elapsed" >>perf.csv
+  echo "section,no_flush,size,pmem,n,Throughput,Elapsed,pmem_read_gb,pmem_read_bw,pmem_write_gb,pmem_write_bw,dram_read_gb,dram_read_bw,dram_write_gb,dram_write_bw" >>perf.csv
 
   no_flushes=("0" "1")
   total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
