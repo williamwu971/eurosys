@@ -161,7 +161,7 @@ void run(char **argv) {
     }
 
     {
-//        bench_start();
+        bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
 #pragma omp parallel
@@ -215,7 +215,7 @@ void run(char **argv) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
 
-//        bench_end();
+        bench_end();
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
