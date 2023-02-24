@@ -205,9 +205,9 @@ void run(char **argv) {
 //                pmem_memcpy_persist(value, buffer, size);
 
                 for (int idx = 0; idx < size; idx += 64) {
-                    memcpy(value + idx, buffer + idx, 64);
+                    memcpy((char *) value + idx, (char *) buffer + idx, 64);
                     if (!no_flush) {
-                        clflush(reinterpret_cast<char *>(value + idx), 64, false, true);
+                        clflush(reinterpret_cast<char *>((char *) value + idx), 64, false, true);
                         //                pmem_persist(value, size);
                     }
                 }
