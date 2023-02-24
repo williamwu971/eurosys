@@ -255,7 +255,7 @@ void run(char **argv) {
 //
 //    }
 
-    delete[] tscs;
+//    delete[] tscs;
 
 }
 
