@@ -95,6 +95,17 @@ double dram_write_gb;
 double dram_read_bw;
 double dram_write_bw;
 
+static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_flush) {
+    for (size_t idx = 0; idx < n; idx += 64) {
+        memcpy(dest + idx, src + idx, 64);
+        if (!no_flush) {
+            clflush(reinterpret_cast<char *>(dest + idx), 64, false, true);
+            //                pmem_persist(value, size);
+        }
+    }
+    return NULL;
+}
+
 void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
@@ -204,13 +215,7 @@ void run(char **argv) {
                 buffer[0] = keys[i];
 //                pmem_memcpy_persist(value, buffer, size);
 
-                for (int idx = 0; idx < size; idx += 64) {
-                    memcpy((char *) value + idx, (char *) buffer + idx, 64);
-                    if (!no_flush) {
-                        clflush(reinterpret_cast<char *>((char *) value + idx), 64, false, true);
-                        //                pmem_persist(value, size);
-                    }
-                }
+                custom_memcpy((char *) value, (char *) buffer, size, no_flush);
 
 //                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
