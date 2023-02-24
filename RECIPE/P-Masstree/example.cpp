@@ -85,7 +85,7 @@ void run(char **argv) {
 
     uint64_t n = std::atoll(argv[1]);
     uint64_t *keys = new uint64_t[n];
-    uint64_t *tscs = new uint64_t[n];
+//    uint64_t *tscs = new uint64_t[n];
 
     // Generate keys
     for (uint64_t i = 0; i < n; i++) {
@@ -137,13 +137,13 @@ void run(char **argv) {
                     clflush(reinterpret_cast<char *>(value), size, false, true);
                 }
 
-                uint64_t pt0 = readTSC(1, 1);
+//                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
                 tree->put(keys[i], value, t);
-                uint64_t pt1 = readTSC(1, 1);
+//                uint64_t pt1 = readTSC(1, 1);
 
 
-                tscs[i] = pt1 - pt0;
+//                tscs[i] = pt1 - pt0;
             }
         }
 
@@ -194,13 +194,13 @@ void run(char **argv) {
                 }
 
 
-                uint64_t pt0 = readTSC(1, 1);
+//                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
                 void *val = tree->put_and_return(keys[i], value, t);
-                uint64_t pt1 = readTSC(1, 1);
+//                uint64_t pt1 = readTSC(1, 1);
 
 
-                tscs[i] = pt1 - pt0;
+//                tscs[i] = pt1 - pt0;
 
                 if (pmem) {
                     RP_free(val);
