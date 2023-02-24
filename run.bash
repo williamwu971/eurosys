@@ -6,14 +6,14 @@ if [ "$#" -ne 1 ]; then
   find . -type f -print0 | xargs --null grep -Z -L '.out' | xargs --null rm
 
   echo "" >>perf.csv
-  echo "section,flush,size,pmem,n,Throughput,Elapsed" >>perf.csv
+  echo "section,no_flush,size,pmem,n,Throughput,Elapsed" >>perf.csv
 
-  flushes=("0" "1")
+  no_flushes=("0" "1")
   total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
   total_sizes=("512" "1024" "2048" "4096")
   total_sizes=($(seq 512 512 3072))
 
-  for f in "${flushes[@]}"; do
+  for nf in "${no_flushes[@]}"; do
     for t in "${total_sizes[@]}"; do
 
       rm -rf ./*.txt /pmem0/* /mnt/nvme0/*
@@ -22,7 +22,7 @@ if [ "$#" -ne 1 ]; then
       # taskset -c 12 ./kernel.out 142800 320 || exit
       #      LD_PRELOAD=/home/blepers/gperftools/.libs/libtcmalloc.so masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 100000000 20 || exit
       #      PMEM_NO_FLUSH="$f" masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 70000000 55 || exit
-      PMEM_NO_FLUSH="$f" masstree_flush="$f" masstree_size="$t" masstree_pmem=0 ./kv.out 70000000 55 || exit
+      PMEM_NO_FLUSH="$nf" masstree_no_flush="$nf" masstree_size="$t" masstree_pmem=0 ./kv.out 70000000 55 || exit
       #  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit

@@ -97,7 +97,7 @@ void run(char **argv) {
 //    tbb::task_scheduler_init init(num_thread);
 
     printf("operation,n,ops/s\n");
-    int flush = strcmp(getenv("masstree_flush"), "1") == 0;
+    int no_flush = strcmp(getenv("masstree_no_flush"), "1") == 0;
 
     int size = atoi(getenv("masstree_size"));
     if (size < 8) size = 8;
@@ -107,6 +107,8 @@ void run(char **argv) {
     if (pmem) {
         RP_init("kv", 160 * 1024 * 1024 * 1024ULL);
     }
+
+    printf("n:<%lu> num_thread:<%d> no_flush:<%d> pmem:<%d>\n", n, num_thread, no_flush, pmem);
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -133,7 +135,7 @@ void run(char **argv) {
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
                 }
-                if (flush) {
+                if (!no_flush) {
                     clflush(reinterpret_cast<char *>(value), size, false, true);
                 }
 
@@ -187,10 +189,11 @@ void run(char **argv) {
                 buffer[0] = keys[i];
 //                pmem_memcpy_persist(value, buffer, size);
                 memcpy(value, buffer, size);
-//                pmem_persist(value, size);
 
-                if (flush) {
+
+                if (!no_flush) {
                     clflush(reinterpret_cast<char *>(value), size, false, true);
+                    //                pmem_persist(value, size);
                 }
 
 
