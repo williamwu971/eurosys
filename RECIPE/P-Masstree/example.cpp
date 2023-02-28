@@ -53,34 +53,34 @@ int bench_start() {
     int res = 1;
 
     char command[4096];
-    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf stat "
-                     "-e cycle_activity.stalls_l1d_miss "
-                     "-e cycle_activity.stalls_l2_miss "
-                     "-e cycle_activity.stalls_l3_miss "
-                     "-e cycle_activity.stalls_mem_any "
-                     "-e cycle_activity.stalls_total "
-                     "-e resource_stalls.sb "
-                     "-p %d -o bench.stat --append -g >> perf_stat.out 2>&1 &",
-            getpid());
-    res &= system(command);
-
-//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
-//                     "-e mem-loads -e mem-stores -d --phys-data "
-//                     "-p %d -o bench.record -g >> perf_record.out 2>&1 &",
+//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf stat "
+//                     "-e cycle_activity.stalls_l1d_miss "
+//                     "-e cycle_activity.stalls_l2_miss "
+//                     "-e cycle_activity.stalls_l3_miss "
+//                     "-e cycle_activity.stalls_mem_any "
+//                     "-e cycle_activity.stalls_total "
+//                     "-e resource_stalls.sb "
+//                     "-p %d -o bench.stat --append -g >> perf_stat.out 2>&1 &",
 //            getpid());
 //    res &= system(command);
+
+    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
+                     "-e mem-loads:ppu -e mem-stores:ppu -d " // user space symbols only
+                     "-p %d -o bench.record >> perf_record.out 2>&1 &", // don't use call-graph
+            getpid());
+    res &= system(command);
 
 //    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf mem record "
 //                     "-p -o bench.mem -D >> perf_mem.out 2>&1 &"
 //    );
 //    res &= system(command);
 //
-    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf c2c record "
-                     "-o bench.c2c >> perf_c2c.out 2>&1 &"
-    );
-    res &= system(command);
+//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf c2c record "
+//                     "-o bench.c2c >> perf_c2c.out 2>&1 &"
+//    );
+//    res &= system(command);
 
-    res &= system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
+//    res &= system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
     sleep(1);
 
     return res;
@@ -90,7 +90,7 @@ int bench_end() {
 
     int res = 1;
     res &= system("sudo killall -s INT perf");
-    res &= system("sudo pkill --signal SIGHUP -f pcm-memory");
+//    res &= system("sudo pkill --signal SIGHUP -f pcm-memory");
 
     sleep(1);
 
