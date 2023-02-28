@@ -63,6 +63,13 @@ int bench_start() {
                      "-p %d -o bench.stat --append -g >> perf_stat.out 2>&1 &",
             getpid());
     res &= system(command);
+
+    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
+                     "-e mem-loads -e mem-stores"
+                     "-p %d -o bench.record -g >> perf_record.out 2>&1 &",
+            getpid());
+    res &= system(command);
+
     res &= system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
     sleep(1);
 
