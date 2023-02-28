@@ -140,7 +140,7 @@ void run(char **argv) {
 
     int pmem = strcmp(getenv("masstree_pmem"), "1") == 0;
     if (pmem) {
-        RP_init("kv", 160 * 1024 * 1024 * 1024ULL);
+        RP_init("kv", 100 * 1024 * 1024 * 1024ULL);
     }
 
     printf("n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d>\n", n, num_thread, no_flush, size, pmem);
@@ -148,6 +148,7 @@ void run(char **argv) {
     masstree::masstree *tree = new masstree::masstree();
 
     {
+        printf("Insert\n");
         // Build tree
         auto starttime = std::chrono::system_clock::now();
 //        tbb::parallel_for(tbb::blocked_range<uint64_t>(0, n), [&](const tbb::blocked_range<uint64_t> &range) {
@@ -196,6 +197,7 @@ void run(char **argv) {
     }
 
     {
+        printf("Update\n");
         bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
@@ -263,6 +265,7 @@ void run(char **argv) {
 
 
     {
+        printf("Lookup\n");
         // Lookup
         auto starttime = std::chrono::system_clock::now();
 #pragma omp parallel
