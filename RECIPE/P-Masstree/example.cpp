@@ -65,7 +65,7 @@ int bench_start() {
     res &= system(command);
 
     sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
-                     "-e mem-loads -e mem-stores "
+                     "-e mem-loads -e mem-stores -d --phys-data "
                      "-p %d -o bench.record -g >> perf_record.out 2>&1 &",
             getpid());
     res &= system(command);
