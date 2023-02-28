@@ -64,16 +64,16 @@ int bench_start() {
             getpid());
     res &= system(command);
 
-    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
-                     "-e mem-loads -e mem-stores -d --phys-data "
-                     "-p %d -o bench.record -g >> perf_record.out 2>&1 &",
-            getpid());
-    res &= system(command);
-
-//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf mem record "
-//                     "-p -o bench.mem -D >> perf_mem.out 2>&1 &"
-//    );
+//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
+//                     "-e mem-loads -e mem-stores -d --phys-data "
+//                     "-p %d -o bench.record -g >> perf_record.out 2>&1 &",
+//            getpid());
 //    res &= system(command);
+
+    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf mem record "
+                     "-p -o bench.mem -D >> perf_mem.out 2>&1 &"
+    );
+    res &= system(command);
 //
 //    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf c2c record "
 //                     "-o bench.c2c >> perf_c2c.out 2>&1 &"
