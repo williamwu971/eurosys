@@ -70,15 +70,15 @@ int bench_start() {
 //            getpid());
 //    res &= system(command);
 
-    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf mem record "
-                     "-p -o bench.mem -D >> perf_mem.out 2>&1 &"
-    );
-    res &= system(command);
-//
-//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf c2c record "
-//                     "-o bench.c2c >> perf_c2c.out 2>&1 &"
+//    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf mem record "
+//                     "-p -o bench.mem -D >> perf_mem.out 2>&1 &"
 //    );
 //    res &= system(command);
+//
+    sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf c2c record "
+                     "-o bench.c2c >> perf_c2c.out 2>&1 &"
+    );
+    res &= system(command);
 
     res &= system("/mnt/sdb/xiaoxiang/pcm/build/bin/pcm-memory -all >pcm-memory.log 2>&1 &");
     sleep(1);
