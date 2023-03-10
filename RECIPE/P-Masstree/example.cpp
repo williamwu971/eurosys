@@ -214,6 +214,11 @@ void run(char **argv) {
     }
 
     {
+        pthread_mutex_t stats_lock;
+        pthread_mutex_init(&stats_lock, nullptr);
+        void *global_lowest = nullptr;
+        void *global_highest = nullptr;
+
         printf("Update\n");
         bench_start();
         // update
@@ -224,6 +229,8 @@ void run(char **argv) {
             auto buffer = static_cast<uint64_t *> (malloc(size));
             memset(buffer, 12, size);
 
+            void *lowest = nullptr;
+            void *highest = nullptr;
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
@@ -233,6 +240,16 @@ void run(char **argv) {
                     value = static_cast<uint64_t *>(RP_malloc(size));
                 } else {
                     value = static_cast<uint64_t *> (malloc(size));
+                }
+
+                if (lowest != nullptr) {
+
+                    if (value < lowest) lowest = value;
+                    if (value > highest) highest = value;
+
+                } else {
+                    lowest = value;
+                    highest = value;
                 }
 
 //                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
@@ -259,6 +276,17 @@ void run(char **argv) {
                     free(val);
                 }
             }
+
+
+            pthread_mutex_lock(&stats_lock);
+            if (global_lowest == nullptr) {
+                global_lowest = lowest;
+                global_highest = highest;
+            } else {
+                if (lowest < global_lowest) global_lowest = lowest;
+                if (highest > global_highest) global_highest = highest;
+            }
+            pthread_mutex_unlock(&stats_lock);
         }
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
@@ -268,6 +296,7 @@ void run(char **argv) {
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
+        printf("lowest/highest: %p %p\n", global_lowest, global_highest);
 
 //        FILE *f = fopen("perf.csv", "a");
 //        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
