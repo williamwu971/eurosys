@@ -66,7 +66,7 @@ int bench_start() {
 
     sprintf(command, "sudo /home/blepers/linux-huge/tools/perf/perf record "
                      "-e mem-loads:ppu -e mem-stores:ppu -d " // user space symbols only
-                     "-p %d -o bench.record >> perf_record.out 2>&1 &", // don't use call-graph
+                     "-p %d -o bench.record &", // don't use call-graph
             getpid());
     res &= system(command);
 
@@ -264,19 +264,19 @@ void run(char **argv) {
                 std::chrono::system_clock::now() - starttime);
 
         bench_end();
-        parse_bandwidth(duration.count() / 1000000.0);
+//        parse_bandwidth(duration.count() / 1000000.0);
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
 
-        FILE *f = fopen("perf.csv", "a");
-        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
-                n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
-
-        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", pmem_read_gb, pmem_read_bw, pmem_write_gb, pmem_write_bw);
-        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", dram_read_gb, dram_read_bw, dram_write_gb, dram_write_bw);
-        fprintf(f, "\n");
-        fclose(f);
+//        FILE *f = fopen("perf.csv", "a");
+//        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
+//                n, (n * 1.0) / duration.count(), duration.count() / 1000000.0);
+//
+//        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", pmem_read_gb, pmem_read_bw, pmem_write_gb, pmem_write_bw);
+//        fprintf(f, "%.2f,%.2f,%.2f,%.2f,", dram_read_gb, dram_read_bw, dram_write_gb, dram_write_bw);
+//        fprintf(f, "\n");
+//        fclose(f);
 
     }
 
