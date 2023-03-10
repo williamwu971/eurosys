@@ -296,7 +296,7 @@ void run(char **argv) {
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
-        printf("lowest/highest: %p %p\n", global_lowest, global_highest);
+        printf("lowest/highest: %lu %lu\n",(uint64_t) global_lowest, (uint64_t)global_highest);
 
 //        FILE *f = fopen("perf.csv", "a");
 //        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
