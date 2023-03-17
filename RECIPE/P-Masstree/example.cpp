@@ -270,11 +270,11 @@ void run(char **argv) {
 
 //                tscs[i] = pt1 - pt0;
 
-                if (pmem) {
-                    RP_free(val);
-                } else {
+               // if (pmem) {
+                 //   RP_free(val);
+                //} else {
                     free(val);
-                }
+                //}
             }
 
 
