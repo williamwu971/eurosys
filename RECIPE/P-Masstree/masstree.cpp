@@ -2,7 +2,7 @@
 #include "Epoche.cpp"
 //#include "ralloc.hpp"
 
-
+/*
 int my_malloc(void **memptr, size_t alignment, size_t size) {
 
 
@@ -17,16 +17,16 @@ int my_malloc(void **memptr, size_t alignment, size_t size) {
         throw;
     }
 
-/*
+
     static uint64_t count = 0;
     count++;
 
     if (count % 100==0)printf("varify %lu %lu\n",actual_size,count);
-*/
+
     return 0;
 
 }
-
+*/
 //#define posix_memalign my_malloc
 
 using namespace MASS;
