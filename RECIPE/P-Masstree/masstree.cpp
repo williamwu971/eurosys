@@ -2,13 +2,13 @@
 #include "Epoche.cpp"
 //#include "ralloc.hpp"
 
-/*
+
 int my_malloc(void **memptr, size_t alignment, size_t size) {
 
 
     size_t actual_size = (size + (alignment - size % alignment));
 
-    *memptr = RP_malloc(actual_size);
+    //*memptr = RP_malloc(actual_size);
 
     // todo: this can be removed
     // leaf is allocated one in a while so should be okay
@@ -26,7 +26,7 @@ int my_malloc(void **memptr, size_t alignment, size_t size) {
     return 0;
 
 }
-*/
+
 //#define posix_memalign my_malloc
 
 using namespace MASS;
