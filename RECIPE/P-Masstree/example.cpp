@@ -7,7 +7,7 @@
 
 #include <x86intrin.h>
 #include <csignal>
-#include <libpmem.h>
+//#include <libpmem.h>
 
 inline
 uint64_t readTSC(int front, int back) {
