@@ -7,7 +7,7 @@
 
 #include <x86intrin.h>
 #include <csignal>
-//#include <libpmem.h>
+#include <libpmem.h>
 
 inline
 uint64_t readTSC(int front, int back) {
@@ -157,7 +157,7 @@ void run(char **argv) {
 
     int pmem = strcmp(getenv("masstree_pmem"), "1") == 0;
     if (pmem) {
-        RP_init("kv", 100 * 1024 * 1024 * 1024ULL);
+        //RP_init("kv", 100 * 1024 * 1024 * 1024ULL);
     }
 
     printf("n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d>\n", n, num_thread, no_flush, size, pmem);
@@ -179,11 +179,11 @@ void run(char **argv) {
 
                 uint64_t *value = nullptr;
 
-                if (pmem) {
-                    value = static_cast<uint64_t *>(RP_malloc(size));
-                } else {
+                //if (pmem) {
+                  //  value = static_cast<uint64_t *>(RP_malloc(size));
+               // } else {
                     value = static_cast<uint64_t *> (malloc(size));
-                }
+              //  }
 
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
@@ -236,11 +236,11 @@ void run(char **argv) {
 
                 uint64_t *value = nullptr;
 
-                if (pmem) {
-                    value = static_cast<uint64_t *>(RP_malloc(size));
-                } else {
+                //if (pmem) {
+                   // value = static_cast<uint64_t *>(RP_malloc(size));
+               // } else {
                     value = static_cast<uint64_t *> (malloc(size));
-                }
+//}
 
                 if (lowest != nullptr) {
 
