@@ -22,12 +22,12 @@ static constexpr uint64_t CACHE_LINE_SIZE = 64;
 
 void wxx_clflush(const void *addr, size_t len) {
 
-    const char* data = (const char *)addr;
+    const char *data = (const char *) addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
 
 
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
-        asm volatile("clflush %0" : "+m" (*(volatile char *)ptr));
+        asm volatile("clflush %0" : "+m" (*(volatile char *) ptr));
     }
 
     asm volatile("sfence":: :"memory");
@@ -36,12 +36,12 @@ void wxx_clflush(const void *addr, size_t len) {
 
 void wxx_byte(const void *addr, size_t len) {
 
-    const char* data = (const char *)addr;
+    const char *data = (const char *) addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
 
 
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
-        asm volatile(".byte 0x66; clflush %0" : "+m" (*(volatile char *)(ptr)));
+        asm volatile(".byte 0x66; clflush %0" : "+m" (*(volatile char *) (ptr)));
     }
 
     asm volatile("sfence":: :"memory");
@@ -50,12 +50,12 @@ void wxx_byte(const void *addr, size_t len) {
 
 void wxx_xsaveopt(const void *addr, size_t len) {
 
-    const char* data = (const char *)addr;
+    const char *data = (const char *) addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
 
 
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
-        asm volatile(".byte 0x66; xsaveopt %0" : "+m" (*(volatile char *)(ptr)));
+        asm volatile(".byte 0x66; xsaveopt %0" : "+m" (*(volatile char *) (ptr)));
     }
 
     asm volatile("sfence":: :"memory");
@@ -64,12 +64,12 @@ void wxx_xsaveopt(const void *addr, size_t len) {
 
 void wxx_clflushopt(const void *addr, size_t len) {
 
-    const char* data = (const char *)addr;
+    const char *data = (const char *) addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
 
 
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
- 	asm volatile("clflushopt %0" : "+m" (*(volatile char *) ptr));
+        asm volatile("clflushopt %0" : "+m" (*(volatile char *) ptr));
     }
 
     asm volatile("sfence":: :"memory");
@@ -78,12 +78,12 @@ void wxx_clflushopt(const void *addr, size_t len) {
 
 void wxx_clwb(const void *addr, size_t len) {
 
-    const char* data = (const char *)addr;
+    const char *data = (const char *) addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
 
 
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
-	asm volatile ("clwb (%0)"::"r"((volatile char *) ptr));
+        asm volatile ("clwb (%0)"::"r"((volatile char *) ptr));
     }
 
     asm volatile("sfence":: :"memory");
@@ -156,6 +156,7 @@ double dram_read_gb;
 double dram_write_gb;
 double dram_read_bw;
 double dram_write_bw;
+
 /*
 static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_flush) {
 
@@ -206,39 +207,35 @@ void run(char **argv) {
     }
 
 
-    char* func_str = getenv("flush_func");
-    void (*flush_func)(const void*,size_t) = NULL;
-    char actual[128]="balala";
+    char *func_str = getenv("flush_func");
+    void (*flush_func)(const void *, size_t) = NULL;
+    char actual[128] = "balala";
 
-    if (strcmp(func_str,"clflush")==0){
-	    flush_func=wxx_clflush;
-	    sprintf(actual,"wxx_clflush");
-    }
-    else if (strcmp(func_str,"byte")==0){
-	    flush_func=wxx_byte;
-	    sprintf(actual,"wxx_byte");
-    }
-    else if (strcmp(func_str,"xsaveopt")==0){
-    		flush_func=wxx_xsaveopt;
-		sprintf(actual,"wxx_xsaveopt");
-    }
-    else if (strcmp(func_str,"clflushopt")==0){
-    	flush_func=wxx_clflushopt;
-	sprintf(actual,"wxx_clflushopt");
-    }
-    else if (strcmp(func_str,"clwb")==0){
-    	flush_func=wxx_clwb;
-	sprintf(actual,"wxx_clwb");
-    }
-    else if (strcmp(func_str,"pmem_persist")==0){
-    	flush_func=pmem_persist;
-	sprintf(actual,"wxx_pmem_persist");
-    }else{
-    
-    	sprintf(actual,"DRAM");
+    if (strcmp(func_str, "clflush") == 0) {
+        flush_func = wxx_clflush;
+        sprintf(actual, "wxx_clflush");
+    } else if (strcmp(func_str, "byte") == 0) {
+        flush_func = wxx_byte;
+        sprintf(actual, "wxx_byte");
+    } else if (strcmp(func_str, "xsaveopt") == 0) {
+        flush_func = wxx_xsaveopt;
+        sprintf(actual, "wxx_xsaveopt");
+    } else if (strcmp(func_str, "clflushopt") == 0) {
+        flush_func = wxx_clflushopt;
+        sprintf(actual, "wxx_clflushopt");
+    } else if (strcmp(func_str, "clwb") == 0) {
+        flush_func = wxx_clwb;
+        sprintf(actual, "wxx_clwb");
+    } else if (strcmp(func_str, "pmem_persist") == 0) {
+        flush_func = pmem_persist;
+        sprintf(actual, "wxx_pmem_persist");
+    } else {
+
+        sprintf(actual, "DRAM");
     }
 
-    fprintf(stderr,"n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d> func:%s \n", n, num_thread, no_flush, size, pmem,actual);
+    fprintf(stderr, "n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d> func:%s \n", n, num_thread, no_flush,
+            size, pmem, actual);
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -258,10 +255,10 @@ void run(char **argv) {
                 uint64_t *value = nullptr;
 
                 //if (pmem) {
-                  //  value = static_cast<uint64_t *>(RP_malloc(size));
-               // } else {
-                    value = static_cast<uint64_t *> (malloc(size));
-              //  }
+                //  value = static_cast<uint64_t *>(RP_malloc(size));
+                // } else {
+                value = static_cast<uint64_t *> (malloc(size));
+                //  }
 
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
@@ -298,7 +295,7 @@ void run(char **argv) {
         void *global_highest = nullptr;
 
         printf("Update\n");
-  //      bench_start();
+        //      bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
 #pragma omp parallel
@@ -315,9 +312,9 @@ void run(char **argv) {
                 uint64_t *value = nullptr;
 
                 //if (pmem) {
-                   // value = static_cast<uint64_t *>(RP_malloc(size));
-               // } else {
-                    value = static_cast<uint64_t *> (malloc(size));
+                // value = static_cast<uint64_t *>(RP_malloc(size));
+                // } else {
+                value = static_cast<uint64_t *> (malloc(size));
 //}
 /*
                 if (lowest != nullptr) {
@@ -339,11 +336,11 @@ void run(char **argv) {
                 buffer[0] = keys[i];
 //                pmem_memcpy_persist(value, buffer, size);
 
-                memcpy(value,  buffer, size);
-		if (!no_flush && flush_func){
-		
-			flush_func(value,size);
-		}
+                memcpy(value, buffer, size);
+                if (!no_flush && flush_func) {
+
+                    flush_func(value, size);
+                }
 
 //                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
@@ -353,23 +350,23 @@ void run(char **argv) {
 
 //                tscs[i] = pt1 - pt0;
 
-               // if (pmem) {
-                 //   RP_free(val);
+                // if (pmem) {
+                //   RP_free(val);
                 //} else {
-                    free(val);
+                free(val);
                 //}
             }
 
 
-            pthread_mutex_lock(&stats_lock);
-            if (global_lowest == nullptr) {
-                global_lowest = lowest;
-                global_highest = highest;
-            } else {
-                if (lowest < global_lowest) global_lowest = lowest;
-                if (highest > global_highest) global_highest = highest;
-            }
-            pthread_mutex_unlock(&stats_lock);
+//            pthread_mutex_lock(&stats_lock);
+//            if (global_lowest == nullptr) {
+//                global_lowest = lowest;
+//                global_highest = highest;
+//            } else {
+//                if (lowest < global_lowest) global_lowest = lowest;
+//                if (highest > global_highest) global_highest = highest;
+//            }
+//            pthread_mutex_unlock(&stats_lock);
         }
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
