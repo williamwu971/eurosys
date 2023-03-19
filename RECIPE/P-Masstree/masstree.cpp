@@ -1,32 +1,34 @@
 #include "masstree.h"
 #include "Epoche.cpp"
 //#include "ralloc.hpp"
-
-/*
-int my_malloc(void **memptr, size_t alignment, size_t size) {
-
-
-    size_t actual_size = (size + (alignment - size % alignment));
-
-    *memptr = RP_malloc(actual_size);
-
-    // todo: this can be removed
-    // leaf is allocated one in a while so should be okay
-    auto casted = (uint64_t) (*memptr);
-    if (casted % alignment != 0) {
-        throw;
-    }
-
-
-    static uint64_t count = 0;
-    count++;
-
-    if (count % 100==0)printf("varify %lu %lu\n",actual_size,count);
-
-    return 0;
-
-}
-*/
+//#include <numa.h>
+//
+//
+//int my_malloc(void **memptr, size_t alignment, size_t size) {
+//
+//
+//    size_t actual_size = (size + (alignment - size % alignment));
+//
+////    *memptr = RP_malloc(actual_size);
+//    *memptr = numa_alloc_onnode(actual_size, 0);
+//
+//    // todo: this can be removed
+//    // leaf is allocated one in a while so should be okay
+//    auto casted = (uint64_t) (*memptr);
+//    if (casted % alignment != 0) {
+//        throw;
+//    }
+//
+//
+////    static uint64_t count = 0;
+////    count++;
+////
+////    if (count % 100==0)printf("varify %lu %lu\n",actual_size,count);
+//
+//    return 0;
+//
+//}
+//
 //#define posix_memalign my_malloc
 
 using namespace MASS;

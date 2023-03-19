@@ -4,6 +4,7 @@
 //#include "tbb/tbb.h"
 //#include "ralloc.hpp"
 #include <omp.h>
+#include <numa.h>
 
 #include <x86intrin.h>
 #include <csignal>
@@ -199,7 +200,7 @@ void run(char **argv) {
 
     int size = atoi(getenv("masstree_size"));
     if (size < 8) size = 8;
-    size = size / 8 * 8;
+    size = size / 64 * 64;
 
     int pmem = strcmp(getenv("masstree_pmem"), "1") == 0;
     if (pmem) {
@@ -240,6 +241,16 @@ void run(char **argv) {
     masstree::masstree *tree = new masstree::masstree();
 
     {
+        // We know that node 3 and 4 has 64GB respectively
+        uint64_t per_node = 60 * 1024 * 1024 * 1024ULL;
+        uint64_t per_thread = size * ((n / num_thread) + 10);
+        char *node3_memory = (char *) numa_alloc_onnode(per_node, 3);
+        char *node4_memory = (char *) numa_alloc_onnode(per_node, 4);
+        if (node3_memory == NULL || node4_memory == NULL) {
+            printf("numa_alloc_onnode failed\n");
+            throw;
+        }
+
         printf("Insert\n");
         // Build tree
         auto starttime = std::chrono::system_clock::now();
@@ -248,6 +259,21 @@ void run(char **argv) {
 #pragma omp parallel
         {
 
+            char *pool;
+            int me = omp_get_thread_num();
+            int divide = num_thread / 2;
+
+            if (me < divide) {
+
+                // use node3
+                pool = node3_memory + me * per_thread;
+
+            } else {
+
+                // use node4
+                me -= divide;
+                pool = node4_memory + me * per_thread;
+            }
 
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
@@ -257,7 +283,9 @@ void run(char **argv) {
                 //if (pmem) {
                 //  value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-                value = static_cast<uint64_t *> (malloc(size));
+//                value = static_cast<uint64_t *> (malloc(size));
+                value = (uint64_t *) pool;
+                pool += size;
                 //  }
 
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
@@ -289,10 +317,12 @@ void run(char **argv) {
     }
 
     {
-        pthread_mutex_t stats_lock;
-        pthread_mutex_init(&stats_lock, nullptr);
-        void *global_lowest = nullptr;
-        void *global_highest = nullptr;
+//        pthread_mutex_t stats_lock;
+//        pthread_mutex_init(&stats_lock, nullptr);
+//        void *global_lowest = nullptr;
+//        void *global_highest = nullptr;
+
+
 
         printf("Update\n");
         //      bench_start();
@@ -304,8 +334,9 @@ void run(char **argv) {
             auto buffer = static_cast<uint64_t *> (malloc(size));
             memset(buffer, 12, size);
 
-            void *lowest = nullptr;
-            void *highest = nullptr;
+//            void *lowest = nullptr;
+//            void *highest = nullptr;
+            void *prev = NULL;
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
@@ -314,7 +345,14 @@ void run(char **argv) {
                 //if (pmem) {
                 // value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-                value = static_cast<uint64_t *> (malloc(size));
+//                value = static_cast<uint64_t *> (malloc(size));
+
+                if (prev == NULL) {
+                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
+                } else {
+                    value = (uint64_t *) prev;
+                }
+
 //}
 /*
                 if (lowest != nullptr) {
@@ -353,7 +391,8 @@ void run(char **argv) {
                 // if (pmem) {
                 //   RP_free(val);
                 //} else {
-                free(val);
+//                free(val);
+                prev = val;
                 //}
             }
 
