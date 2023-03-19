@@ -244,8 +244,8 @@ void run(char **argv) {
         // We know that node 3 and 4 has 64GB respectively
         uint64_t per_node = 60 * 1024 * 1024 * 1024ULL;
         uint64_t per_thread = size * ((n / num_thread) + 10);
-        char *node3_memory = (char *) numa_alloc_onnode(per_node, 2);
-        char *node4_memory = (char *) numa_alloc_onnode(per_node, 2);
+        char *node3_memory = (char *) numa_alloc_onnode(per_node, 1);
+        char *node4_memory = (char *) numa_alloc_onnode(per_node, 1);
         if (node3_memory == NULL || node4_memory == NULL) {
             printf("numa_alloc_onnode failed\n");
             throw;
