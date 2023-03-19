@@ -242,11 +242,11 @@ void run(char **argv) {
 
     {
 
-        int numas = numa_available();
-        printf("numas: %d\n",numas);
-        if (numas!=2){
-            throw;
-        }
+//        int numas = numa_available();
+//        printf("numas: %d\n",numas);
+//        if (numas!=2){
+//            throw;
+//        }
 
         // We know that node 3 and 4 has 64GB respectively
         uint64_t per_node = 60 * 1024 * 1024 * 1024ULL;
