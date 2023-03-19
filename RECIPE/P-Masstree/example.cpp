@@ -19,29 +19,74 @@ uint64_t readTSC(int front, int back) {
 
 static constexpr uint64_t CACHE_LINE_SIZE = 64;
 
-static inline void fence() {
-    asm volatile("" : : : "memory");
-}
 
-static inline void mfence() {
+void wxx_clflush(const void *addr, size_t len) {
+
+    const char* data = (const char *)addr;
+    volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
+
+
+    for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
+        asm volatile("clflush %0" : "+m" (*(volatile char *)ptr));
+    }
+
     asm volatile("sfence":: :"memory");
 }
 
-static inline void clflush(char *data, int len, bool front, bool back) {
+
+void wxx_byte(const void *addr, size_t len) {
+
+    const char* data = (const char *)addr;
     volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
-    if (front)
-        mfence();
+
+
     for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
-#ifdef CLFLUSH
-        asm volatile("clflush %0" : "+m" (*(volatile char *)ptr));
-#elif CLFLUSH_OPT
         asm volatile(".byte 0x66; clflush %0" : "+m" (*(volatile char *)(ptr)));
-#elif CLWB
-        asm volatile(".byte 0x66; xsaveopt %0" : "+m" (*(volatile char *)(ptr)));
-#endif
     }
-    if (back)
-        mfence();
+
+    asm volatile("sfence":: :"memory");
+}
+
+
+void wxx_xsaveopt(const void *addr, size_t len) {
+
+    const char* data = (const char *)addr;
+    volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
+
+
+    for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
+        asm volatile(".byte 0x66; xsaveopt %0" : "+m" (*(volatile char *)(ptr)));
+    }
+
+    asm volatile("sfence":: :"memory");
+}
+
+
+void wxx_clflushopt(const void *addr, size_t len) {
+
+    const char* data = (const char *)addr;
+    volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
+
+
+    for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
+ 	asm volatile("clflushopt %0" : "+m" (*(volatile char *) ptr));
+    }
+
+    asm volatile("sfence":: :"memory");
+}
+
+
+void wxx_clwb(const void *addr, size_t len) {
+
+    const char* data = (const char *)addr;
+    volatile char *ptr = (char *) ((unsigned long) data & ~(CACHE_LINE_SIZE - 1));
+
+
+    for (; ptr < data + len; ptr += CACHE_LINE_SIZE) {
+	asm volatile ("clwb (%0)"::"r"((volatile char *) ptr));
+    }
+
+    asm volatile("sfence":: :"memory");
 }
 
 using namespace std;
@@ -111,13 +156,13 @@ double dram_read_gb;
 double dram_write_gb;
 double dram_read_bw;
 double dram_write_bw;
-
+/*
 static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_flush) {
 
     memcpy(dest, src, n);
     if (!no_flush) {
-//            clflush(reinterpret_cast<char *>(dest + idx), 64, false, true);
-        pmem_persist(dest, n);
+            clflush(reinterpret_cast<char *>(dest), n, false, true);
+//        pmem_persist(dest, n);
     }
 
     return NULL;
@@ -131,7 +176,7 @@ static inline void *custom_memcpy(char *dest, const char *src, size_t n, int no_
     }
     return NULL;
 }
-
+*/
 void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
@@ -149,7 +194,7 @@ void run(char **argv) {
 //    tbb::task_scheduler_init init(num_thread);
 
     printf("operation,n,ops/s\n");
-    int no_flush = strcmp(getenv("masstree_no_flush"), "1") == 0;
+    int no_flush = strcmp(getenv("PMEM_NO_FLUSH"), "1") == 0;
 
     int size = atoi(getenv("masstree_size"));
     if (size < 8) size = 8;
@@ -160,7 +205,40 @@ void run(char **argv) {
         //RP_init("kv", 100 * 1024 * 1024 * 1024ULL);
     }
 
-    printf("n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d>\n", n, num_thread, no_flush, size, pmem);
+
+    char* func_str = getenv("flush_func");
+    void (*flush_func)(const void*,size_t) = NULL;
+    char actual[128]="balala";
+
+    if (strcmp(func_str,"clflush")==0){
+	    flush_func=wxx_clflush;
+	    sprintf(actual,"wxx_clflush");
+    }
+    else if (strcmp(func_str,"byte")==0){
+	    flush_func=wxx_byte;
+	    sprintf(actual,"wxx_byte");
+    }
+    else if (strcmp(func_str,"xsaveopt")==0){
+    		flush_func=wxx_xsaveopt;
+		sprintf(actual,"wxx_xsaveopt");
+    }
+    else if (strcmp(func_str,"clflushopt")==0){
+    	flush_func=wxx_clflushopt;
+	sprintf(actual,"wxx_clflushopt");
+    }
+    else if (strcmp(func_str,"clwb")==0){
+    	flush_func=wxx_clwb;
+	sprintf(actual,"wxx_clwb");
+    }
+    else if (strcmp(func_str,"pmem_persist")==0){
+    	flush_func=pmem_persist;
+	sprintf(actual,"wxx_pmem_persist");
+    }else{
+    
+    	sprintf(actual,"DRAM");
+    }
+
+    fprintf(stderr,"n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d> func:%s \n", n, num_thread, no_flush, size, pmem,actual);
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -188,8 +266,8 @@ void run(char **argv) {
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
                     value[idx] = keys[i];
                 }
-                if (!no_flush) {
-                    clflush(reinterpret_cast<char *>(value), size, false, true);
+                if (!no_flush && flush_func) {
+                    flush_func(value, size);
                 }
 
 //                uint64_t pt0 = readTSC(1, 1);
@@ -220,7 +298,7 @@ void run(char **argv) {
         void *global_highest = nullptr;
 
         printf("Update\n");
-        bench_start();
+  //      bench_start();
         // update
         auto starttime = std::chrono::system_clock::now();
 #pragma omp parallel
@@ -241,7 +319,7 @@ void run(char **argv) {
                // } else {
                     value = static_cast<uint64_t *> (malloc(size));
 //}
-
+/*
                 if (lowest != nullptr) {
 
                     if (value < lowest) lowest = value;
@@ -251,6 +329,7 @@ void run(char **argv) {
                     lowest = value;
                     highest = value;
                 }
+		*/
 
 //                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
 //                    value[idx] = keys[i];
@@ -260,7 +339,11 @@ void run(char **argv) {
                 buffer[0] = keys[i];
 //                pmem_memcpy_persist(value, buffer, size);
 
-                custom_memcpy((char *) value, (char *) buffer, size, no_flush);
+                memcpy(value,  buffer, size);
+		if (!no_flush && flush_func){
+		
+			flush_func(value,size);
+		}
 
 //                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
@@ -291,12 +374,12 @@ void run(char **argv) {
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
 
-        bench_end();
+//        bench_end();
 //        parse_bandwidth(duration.count() / 1000000.0);
 
         printf("Throughput: update,%ld,%f ops/us\n", n, (n * 1.0) / duration.count());
         printf("Elapsed time: update,%ld,%f sec\n", n, duration.count() / 1000000.0);
-        printf("lowest/highest: %lu %lu\n",(uint64_t) global_lowest, (uint64_t)global_highest);
+//        printf("lowest/highest: %lu %lu\n",(uint64_t) global_lowest, (uint64_t)global_highest);
 
 //        FILE *f = fopen("perf.csv", "a");
 //        fprintf(f, "update,%d,%d,%d,%lu,%f,%f,", no_flush, size, pmem,
