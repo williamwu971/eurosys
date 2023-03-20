@@ -14,7 +14,7 @@ for func in "${flushes[@]}"; do
 for i in {1..3}
 do
 	echo "$i"	
-	masstree_size="4096" flush_func="$func" \
+	masstree_size="512" flush_func="$func" \
 		numactl -m 2,3 taskset -c 0-27 ./kv.out 20000000 27 | grep update | grep ops >> update.run.txt
 done
 done
