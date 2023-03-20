@@ -2,3 +2,9 @@
 cmake-build-debug/
 *.pdf
 build/
+*.png
+*.record
+*.stat
+*.parsed
+*.data
+
