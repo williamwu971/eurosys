@@ -18,7 +18,8 @@ uint64_t readTSC(int front, int back) {
     return tsc;
 }
 
-static constexpr uint64_t CACHE_LINE_SIZE = 64;
+static constexpr uint64_t
+CACHE_LINE_SIZE = 64;
 
 
 void wxx_clflush(const void *addr, size_t len) {
@@ -183,7 +184,7 @@ void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
     uint64_t n = std::atoll(argv[1]);
-    uint64_t *keys = new uint64_t[n];
+    uint64_t * keys = new uint64_t[n];
 //    uint64_t *tscs = new uint64_t[n];
 
     // Generate keys
@@ -214,19 +215,19 @@ void run(char **argv) {
 
     if (strcmp(func_str, "clflush") == 0) {
         flush_func = wxx_clflush;
-        sprintf(actual, "wxx_clflush");
+        sprintf(actual, "using clflush");
     } else if (strcmp(func_str, "byte") == 0) {
         flush_func = wxx_byte;
-        sprintf(actual, "wxx_byte");
+        sprintf(actual, "using byte");
     } else if (strcmp(func_str, "xsaveopt") == 0) {
         flush_func = wxx_xsaveopt;
-        sprintf(actual, "wxx_xsaveopt");
+        sprintf(actual, "using xsaveopt");
     } else if (strcmp(func_str, "clflushopt") == 0) {
         flush_func = wxx_clflushopt;
-        sprintf(actual, "wxx_clflushopt");
+        sprintf(actual, "using clflushopt");
     } else if (strcmp(func_str, "clwb") == 0) {
         flush_func = wxx_clwb;
-        sprintf(actual, "wxx_clwb");
+        sprintf(actual, "using clwb");
     } else if (strcmp(func_str, "pmem_persist") == 0) {
         flush_func = pmem_persist;
         sprintf(actual, "wxx_pmem_persist");
@@ -235,8 +236,7 @@ void run(char **argv) {
         sprintf(actual, "DRAM");
     }
 
-    fprintf(stderr, "n:<%lu> num_thread:<%d> no_flush:<%d> size:<%d> pmem:<%d> func:%s \n", n, num_thread, no_flush,
-            size, pmem, actual);
+    fprintf(stderr, "no_flush:<%d> size:<%d> pmem:<%d> func:%s \n", no_flush, size, pmem, actual);
 
     masstree::masstree *tree = new masstree::masstree();
 
@@ -285,13 +285,14 @@ void run(char **argv) {
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t *value = nullptr;
+                uint64_t * value = nullptr;
 
                 //if (pmem) {
                 //  value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
 //                value = static_cast<uint64_t *> (malloc(size));
-                value = (uint64_t *) pool;
+                value = (uint64_t * )
+                pool;
                 pool += size;
                 //  }
 
@@ -347,7 +348,7 @@ void run(char **argv) {
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t *value = nullptr;
+                uint64_t * value = nullptr;
 
                 //if (pmem) {
                 // value = static_cast<uint64_t *>(RP_malloc(size));
@@ -357,7 +358,8 @@ void run(char **argv) {
                 if (prev == NULL) {
                     value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
                 } else {
-                    value = (uint64_t *) prev;
+                    value = (uint64_t * )
+                    prev;
                 }
 
 //}
@@ -444,7 +446,7 @@ void run(char **argv) {
         {
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
-                uint64_t *ret = reinterpret_cast<uint64_t *> (tree->get(keys[i], t));
+                uint64_t * ret = reinterpret_cast<uint64_t *> (tree->get(keys[i], t));
                 if (*ret != keys[i]) {
                     std::cout << "wrong value read: " << *ret << " expected:" << keys[i] << std::endl;
                     throw;
