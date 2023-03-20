@@ -14,8 +14,8 @@ for func in "${flushes[@]}"; do
 for i in {1..3}
 do
 	echo "$i"	
-	PMEM_NO_FLUSH="0" masstree_size="4096" masstree_pmem=0 flush_func="$func" \
-		numactl -m 0,1,2,3 taskset -c 0-27 ./kv.out 20000000 27 | grep update | grep ops >> update.run.txt
+	masstree_size="4096" flush_func="$func" \
+		numactl -m 2,3 taskset -c 0-27 ./kv.out 20000000 27 | grep update | grep ops >> update.run.txt
 done
 done
 

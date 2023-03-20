@@ -4,7 +4,7 @@
 //#include "tbb/tbb.h"
 //#include "ralloc.hpp"
 #include <omp.h>
-#include <numa.h>
+//#include <numa.h>
 
 #include <x86intrin.h>
 #include <csignal>
@@ -251,14 +251,14 @@ void run(char **argv) {
 //        }
 
         // We know that node 3 and 4 has 64GB respectively
-        uint64_t per_node = 60 * 1024 * 1024 * 1024ULL;
-        uint64_t per_thread = size * ((n / num_thread) + 10);
-        char *node3_memory = (char *) numa_alloc_onnode(per_node, 2);
-        char *node4_memory = (char *) numa_alloc_onnode(per_node, 3);
-        if (node3_memory == NULL || node4_memory == NULL) {
-            printf("numa_alloc_onnode failed\n");
-            throw;
-        }
+//        uint64_t per_node = 60 * 1024 * 1024 * 1024ULL;
+//        uint64_t per_thread = size * ((n / num_thread) + 10);
+//        char *node3_memory = (char *) numa_alloc_onnode(per_node, 2);
+//        char *node4_memory = (char *) numa_alloc_onnode(per_node, 3);
+//        if (node3_memory == NULL || node4_memory == NULL) {
+//            printf("numa_alloc_onnode failed\n");
+//            throw;
+//        }
 
         printf("Insert\n");
         // Build tree
@@ -268,21 +268,21 @@ void run(char **argv) {
 #pragma omp parallel
         {
 
-            char *pool;
-            int me = omp_get_thread_num();
-            int divide = num_thread / 2;
-
-            if (me < divide) {
-
-                // use node3
-                pool = node3_memory + me * per_thread;
-
-            } else {
-
-                // use node4
-                me -= divide;
-                pool = node4_memory + me * per_thread;
-            }
+//            char *pool;
+//            int me = omp_get_thread_num();
+//            int divide = num_thread / 2;
+//
+//            if (me < divide) {
+//
+//                // use node3
+//                pool = node3_memory + me * per_thread;
+//
+//            } else {
+//
+//                // use node4
+//                me -= divide;
+//                pool = node4_memory + me * per_thread;
+//            }
 
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
@@ -292,10 +292,10 @@ void run(char **argv) {
                 //if (pmem) {
                 //  value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-//                value = static_cast<uint64_t *> (malloc(size));
-                value = (uint64_t * )
-                pool;
-                pool += size;
+                value = static_cast<uint64_t *> (malloc(size));
+//                value = (uint64_t * )
+//                pool;
+//                pool += size;
                 //  }
 
                 for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
@@ -346,7 +346,7 @@ void run(char **argv) {
 
 //            void *lowest = nullptr;
 //            void *highest = nullptr;
-            void *prev = NULL;
+//            void *prev = NULL;
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
@@ -355,14 +355,14 @@ void run(char **argv) {
                 //if (pmem) {
                 // value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-//                value = static_cast<uint64_t *> (malloc(size));
+                value = static_cast<uint64_t *> (malloc(size));
 
-                if (prev == NULL) {
-                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
-                } else {
-                    value = (uint64_t * )
-                    prev;
-                }
+//                if (prev == NULL) {
+//                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
+//                } else {
+//                    value = (uint64_t * )
+//                    prev;
+//                }
 
 //}
 /*
@@ -402,8 +402,8 @@ void run(char **argv) {
                 // if (pmem) {
                 //   RP_free(val);
                 //} else {
-//                free(val);
-                prev = val;
+                free(val);
+//                prev = val;
                 //}
             }
 
