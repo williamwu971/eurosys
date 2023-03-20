@@ -216,7 +216,9 @@ void run(char **argv) {
     void (*flush_func)(const void *, size_t) = NULL;
     char actual[128] = "balala";
 
-    if (strcmp(func_str, "clflush") == 0) {
+    if (!func_str) {
+        sprintf(actual, "not flushing");
+    } else if (strcmp(func_str, "clflush") == 0) {
         flush_func = wxx_clflush;
         sprintf(actual, "using clflush");
     } else if (strcmp(func_str, "byte") == 0) {
