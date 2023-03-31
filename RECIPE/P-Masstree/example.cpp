@@ -346,28 +346,30 @@ void run(char **argv) {
             uint64_t tree_time = 0;
             uint64_t write_time = 0;
 
+//            auto value = static_cast<uint64_t *> (malloc(size));
+//            void *val = tree->put_and_return(keys[i], value, t);
+//            free(val);
+
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
                 uint64_t t0 = readTSC(1, 0);
 
-                auto value = static_cast<uint64_t *> (malloc(size));
+                auto value = (uint64_t *) tree->get(keys[i], t);
+
+                uint64_t t1 = readTSC(1, 0);
+
                 buffer[0] = keys[i];
                 memcpy(value, buffer, size);
                 if (flush_func) {
                     flush_func(value, size);
                 }
 
-                uint64_t t1 = readTSC(1, 0);
-
-                void *val = tree->put_and_return(keys[i], value, t);
-                free(val);
-
                 uint64_t t2 = readTSC(1, 0);
 
 
-                write_time += t1 - t0;
-                tree_time += t2 - t1;
+                tree_time += t1 - t0;
+                write_time += t2 - t1;
             }
 
             int id = omp_get_thread_num();
