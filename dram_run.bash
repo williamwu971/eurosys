@@ -5,6 +5,7 @@ cd build || exit
 rm -f update.run.txt
 
 flushes=("clflush" "byte" "xsaveopt" "clflushopt" "clwb" "pmem_persist" "DRAM")
+flushes=("clwb" "DRAM")
 
 for func in "${flushes[@]}"; do
 
