@@ -8,18 +8,16 @@
 
 #include <x86intrin.h>
 #include <csignal>
-#include <libpmem.h>
+//#include <libpmem.h>
 
-inline
-uint64_t readTSC(int front, int back) {
+static inline uint64_t readTSC(int front, int back) {
     if (front)_mm_lfence();  // optionally wait for earlier insns to retire before reading the clock
     uint64_t tsc = __rdtsc();
     if (back)_mm_lfence();  // optionally block later instructions until rdtsc retires
     return tsc;
 }
 
-static constexpr uint64_t
-CACHE_LINE_SIZE = 64;
+static constexpr uint64_t CACHE_LINE_SIZE = 64;
 
 
 void wxx_clflush(const void *addr, size_t len) {
@@ -184,7 +182,7 @@ void run(char **argv) {
     std::cout << "Simple Example of P-Masstree" << std::endl;
 
     uint64_t n = std::atoll(argv[1]);
-    uint64_t * keys = new uint64_t[n];
+    uint64_t *keys = new uint64_t[n];
 //    uint64_t *tscs = new uint64_t[n];
 
     // Generate keys
@@ -233,9 +231,6 @@ void run(char **argv) {
     } else if (strcmp(func_str, "clwb") == 0) {
         flush_func = wxx_clwb;
         sprintf(actual, "using clwb");
-    } else if (strcmp(func_str, "pmem_persist") == 0) {
-        flush_func = pmem_persist;
-        sprintf(actual, "using pmem_persist");
     } else {
         sprintf(actual, "not flushing");
     }
@@ -289,7 +284,7 @@ void run(char **argv) {
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t * value = nullptr;
+                uint64_t *value = nullptr;
 
                 //if (pmem) {
                 //  value = static_cast<uint64_t *>(RP_malloc(size));
@@ -335,6 +330,8 @@ void run(char **argv) {
 //        void *global_highest = nullptr;
 
 
+        auto tree_tscs = new uint64_t[num_thread];
+        auto write_tscs = new uint64_t[num_thread];
 
         printf("Update\n");
         //      bench_start();
@@ -346,18 +343,25 @@ void run(char **argv) {
             auto buffer = static_cast<uint64_t *> (malloc(size));
             memset(buffer, 12, size);
 
+            uint64_t tree_time = 0;
+            uint64_t write_time = 0;
+
 //            void *lowest = nullptr;
 //            void *highest = nullptr;
 //            void *prev = NULL;
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t * value = nullptr;
+                uint64_t *value = nullptr;
 
                 //if (pmem) {
                 // value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-                value = static_cast<uint64_t *> (malloc(size));
+//                value = static_cast<uint64_t *> (malloc(size));
+
+                uint64_t t0 = readTSC(1, 0);
+                value = (uint64_t *) tree->get(keys[i], t);
+                uint64_t t1 = readTSC(1, 0);
 
 //                if (prev == NULL) {
 //                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
@@ -389,13 +393,16 @@ void run(char **argv) {
 
                 memcpy(value, buffer, size);
                 if (flush_func) {
-
                     flush_func(value, size);
                 }
+                uint64_t t2 = readTSC(1, 0);
+
+                tree_time += t1 - t0;
+                write_time += t2 - t1;
 
 //                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
-                void *val = tree->put_and_return(keys[i], value, t);
+//                void *val = tree->put_and_return(keys[i], value, t);
 //                uint64_t pt1 = readTSC(1, 1);
 
 
@@ -404,10 +411,14 @@ void run(char **argv) {
                 // if (pmem) {
                 //   RP_free(val);
                 //} else {
-                free(val);
+//                free(val);
 //                prev = val;
                 //}
             }
+
+            int id = omp_get_thread_num();
+            tree_tscs[id] = tree_time;
+            write_tscs[id] = write_time;
 
 
 //            pthread_mutex_lock(&stats_lock);
@@ -439,6 +450,18 @@ void run(char **argv) {
 //        fprintf(f, "\n");
 //        fclose(f);
 
+        uint64_t tree_sum = 0;
+        uint64_t write_sum = 0;
+
+        for (int i = 0; i < num_thread; i++) {
+            tree_sum += tree_tscs[i];
+            write_sum += write_tscs[i];
+        }
+
+        tree_sum /= n;
+        write_sum /= n;
+
+        printf("tree: %lu write: %lu\n", tree_sum, write_sum);
     }
 
 
@@ -450,7 +473,7 @@ void run(char **argv) {
         {
             auto t = tree->getThreadInfo();
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
-                uint64_t * ret = reinterpret_cast<uint64_t *> (tree->get(keys[i], t));
+                uint64_t *ret = reinterpret_cast<uint64_t *> (tree->get(keys[i], t));
                 if (*ret != keys[i]) {
                     std::cout << "wrong value read: " << *ret << " expected:" << keys[i] << std::endl;
                     throw;

@@ -13,7 +13,7 @@ if [ "$#" -ne 1 ]; then
   total_sizes=("8" "16" "32" "64" "128" "256" "512" "1024")
   total_sizes=("512" "1024" "2048" "4096")
   total_sizes=($(seq 512 512 3072))
-  total_sizes=("1024")
+  total_sizes=("4096")
 
 
 
