@@ -26,7 +26,7 @@ if [ "$#" -ne 1 ]; then
       # taskset -c 12 ./kernel.out 142800 320 || exit
       #      LD_PRELOAD=/home/blepers/gperftools/.libs/libtcmalloc.so masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 100000000 20 || exit
       #      PMEM_NO_FLUSH="$f" masstree_flush="$f" masstree_size="$t" masstree_pmem=0 taskset -c 0-20 ./kv.out 70000000 55 || exit
-      PMEM_NO_FLUSH="$nf" masstree_no_flush="$nf" masstree_size="$t" masstree_pmem=0 numactl -m 4,5,6,7 ./kv.out 70000000 55 || exit
+      PMEM_NO_FLUSH="$nf" masstree_no_flush="$nf" masstree_size="$t" masstree_pmem=0 numactl -i 4,5 taskset -c 0-27 ./kv.out 10000000 27 || exit
       #  taskset -c 0-20 ./kv_no_flush.out 100000000 19 || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_expand.out 2560 "$((4 * 1024 * 1024))" || exit
       #  rm -rf /pmem0/* && taskset -c 12 ./fs_open.out 2560 "$((4 * 1024 * 1024))" || exit
