@@ -353,11 +353,11 @@ void run(char **argv) {
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t t0 = readTSC(1, 0);
+                uint64_t t0 = readTSC(1, 1);
 
                 auto value = (uint64_t *) tree->get(keys[i], t);
 
-                uint64_t t1 = readTSC(1, 0);
+                uint64_t t1 = readTSC(1, 1);
 
                 buffer[0] = keys[i];
                 memcpy(value, buffer, size);
@@ -365,7 +365,7 @@ void run(char **argv) {
                     flush_func(value, size);
                 }
 
-                uint64_t t2 = readTSC(1, 0);
+                uint64_t t2 = readTSC(1, 1);
 
 
                 tree_time += t1 - t0;
