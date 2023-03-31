@@ -357,11 +357,11 @@ void run(char **argv) {
                 //if (pmem) {
                 // value = static_cast<uint64_t *>(RP_malloc(size));
                 // } else {
-//                value = static_cast<uint64_t *> (malloc(size));
+                value = static_cast<uint64_t *> (malloc(size));
 
-                uint64_t t0 = readTSC(1, 0);
-                value = (uint64_t *) tree->get(keys[i], t);
-                uint64_t t1 = readTSC(1, 0);
+//                uint64_t t0 = readTSC(1, 0);
+//                value = (uint64_t *) tree->get(keys[i], t);
+//                uint64_t t1 = readTSC(1, 0);
 
 //                if (prev == NULL) {
 //                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
@@ -387,7 +387,7 @@ void run(char **argv) {
 //                    value[idx] = keys[i];
 //                }
 
-
+                uint64_t t0 = readTSC(1, 0);
                 buffer[0] = keys[i];
 //                pmem_memcpy_persist(value, buffer, size);
 
@@ -395,14 +395,14 @@ void run(char **argv) {
                 if (flush_func) {
                     flush_func(value, size);
                 }
-                uint64_t t2 = readTSC(1, 0);
+                uint64_t t1 = readTSC(1, 0);
 
-                tree_time += t1 - t0;
-                write_time += t2 - t1;
+
 
 //                uint64_t pt0 = readTSC(1, 1);
 //                tree->put(keys[i], &keys[i], t);
-//                void *val = tree->put_and_return(keys[i], value, t);
+                void *val = tree->put_and_return(keys[i], value, t);
+                uint64_t t2 = readTSC(1, 0);
 //                uint64_t pt1 = readTSC(1, 1);
 
 
@@ -411,9 +411,12 @@ void run(char **argv) {
                 // if (pmem) {
                 //   RP_free(val);
                 //} else {
-//                free(val);
+                free(val);
 //                prev = val;
                 //}
+
+                write_time += t1 - t0;
+                tree_time += t2 - t1;
             }
 
             int id = omp_get_thread_num();
