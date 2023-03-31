@@ -346,74 +346,25 @@ void run(char **argv) {
             uint64_t tree_time = 0;
             uint64_t write_time = 0;
 
-//            void *lowest = nullptr;
-//            void *highest = nullptr;
-//            void *prev = NULL;
 
             for (uint64_t i = omp_get_thread_num(); i < n; i += num_thread) {
 
-                uint64_t *value = nullptr;
-
-                //if (pmem) {
-                // value = static_cast<uint64_t *>(RP_malloc(size));
-                // } else {
-                value = static_cast<uint64_t *> (malloc(size));
-
-//                uint64_t t0 = readTSC(1, 0);
-//                value = (uint64_t *) tree->get(keys[i], t);
-//                uint64_t t1 = readTSC(1, 0);
-
-//                if (prev == NULL) {
-//                    value = static_cast<uint64_t *> (malloc(sizeof(uint64_t)));
-//                } else {
-//                    value = (uint64_t * )
-//                    prev;
-//                }
-
-//}
-/*
-                if (lowest != nullptr) {
-
-                    if (value < lowest) lowest = value;
-                    if (value > highest) highest = value;
-
-                } else {
-                    lowest = value;
-                    highest = value;
-                }
-		*/
-
-//                for (uint64_t idx = 0; idx < size / sizeof(uint64_t); idx++) {
-//                    value[idx] = keys[i];
-//                }
-
                 uint64_t t0 = readTSC(1, 0);
-                buffer[0] = keys[i];
-//                pmem_memcpy_persist(value, buffer, size);
 
+                auto value = static_cast<uint64_t *> (malloc(size));
+                buffer[0] = keys[i];
                 memcpy(value, buffer, size);
                 if (flush_func) {
                     flush_func(value, size);
                 }
+
                 uint64_t t1 = readTSC(1, 0);
 
-
-
-//                uint64_t pt0 = readTSC(1, 1);
-//                tree->put(keys[i], &keys[i], t);
                 void *val = tree->put_and_return(keys[i], value, t);
-                uint64_t t2 = readTSC(1, 0);
-//                uint64_t pt1 = readTSC(1, 1);
-
-
-//                tscs[i] = pt1 - pt0;
-
-                // if (pmem) {
-                //   RP_free(val);
-                //} else {
                 free(val);
-//                prev = val;
-                //}
+
+                uint64_t t2 = readTSC(1, 0);
+
 
                 write_time += t1 - t0;
                 tree_time += t2 - t1;
@@ -422,17 +373,6 @@ void run(char **argv) {
             int id = omp_get_thread_num();
             tree_tscs[id] = tree_time;
             write_tscs[id] = write_time;
-
-
-//            pthread_mutex_lock(&stats_lock);
-//            if (global_lowest == nullptr) {
-//                global_lowest = lowest;
-//                global_highest = highest;
-//            } else {
-//                if (lowest < global_lowest) global_lowest = lowest;
-//                if (highest > global_highest) global_highest = highest;
-//            }
-//            pthread_mutex_unlock(&stats_lock);
         }
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
                 std::chrono::system_clock::now() - starttime);
