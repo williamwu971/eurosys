@@ -9,6 +9,7 @@ flushes=("clwb" "DRAM")
 
 for func in "${flushes[@]}"; do
 
+  echo "$func"
   echo "$func" >>update.run.txt
 
   for i in {1..1}; do
